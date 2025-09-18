@@ -372,11 +372,17 @@ function closeAdminLogin() {
 }
 
 function showPublicSpace() {
+    // S'assurer que le scroll est toujours activé dans la partie utilisateur
+    document.body.style.overflow = '';
+    closeMobileMenu(); // Fermer le menu mobile s'il est ouvert
     showPage('publicPage');
     updatePublicSpace();
 }
 
 function backToHome() {
+    // Restaurer le scroll quand on revient à l'accueil
+    document.body.style.overflow = '';
+    closeMobileMenu(); // Fermer le menu mobile s'il est ouvert
     showPage('loginPage');
 }
 
