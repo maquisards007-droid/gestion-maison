@@ -9,9 +9,12 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "*",
+    origin: process.env.NODE_ENV === 'production' 
+      ? ["https://gestion-maison.onrender.com"] 
+      : "*",
     methods: ["GET", "POST"]
-  }
+  },
+  transports: ['websocket', 'polling']
 });
 
 const PORT = process.env.PORT || 3000;
@@ -21,7 +24,16 @@ const DATA_FILE = path.join(__dirname, 'data.json');
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(__dirname));
+app.use(express.static(__dirname, {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    }
+    if (path.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    }
+  }
+}));
 
 // Structure de données par défaut
 const defaultData = {
@@ -75,15 +87,20 @@ app.get('/api/data', async (req, res) => {
 });
 
 app.post('/api/data', async (req, res) => {
-  appData = req.body;
-  const saved = await saveData(appData);
-  if (saved) {
-    // Notifier tous les clients connectés
-    io.emit('dataUpdated', appData);
+  try {
+    appData = req.body;
+    await saveData(appData);
+    io.emit('dataUpdate', appData);
     res.json({ success: true });
-  } else {
-    res.status(500).json({ success: false, error: 'Erreur de sauvegarde' });
+  } catch (error) {
+    console.error('Erreur lors de la sauvegarde:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
   }
+});
+
+// Route catch-all pour servir index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // Gestion des connexions WebSocket
