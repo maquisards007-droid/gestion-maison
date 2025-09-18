@@ -12,6 +12,16 @@ let appData = {
     groupRotation: {
         startWeek: getCurrentWeekNumber(),
         rotationOrder: ['marche', 'poulet', 'repos']
+    },
+    monthlyBills: {
+        // Structure: "YYYY-MM": { loyer: 4500, electricite: 0, eau: 0, gaz: 0, imprevus: 0, autres: [] }
+        // autres: [{ nom: "Description", montant: 0 }]
+    },
+    monthlyPayments: {
+        // Structure: "YYYY-MM": { "userName": { paid: 0, remaining: 0, payments: [{ amount: 0, date: "YYYY-MM-DD", note: "" }] } }
+    },
+    monthlySettings: {
+        loyerDefaut: 4500
     }
 };
 
@@ -350,6 +360,9 @@ function showAdminSection(sectionId) {
             displayGroups();
             displayCurrentWeekRotation();
             break;
+        case 'monthly':
+            initializeMonthlySection();
+            break;
         case 'settings':
             updateSettingsForm();
             break;
@@ -481,6 +494,15 @@ function closeModal(modalId) {
     if (modalId === 'groupModal') {
         document.getElementById('groupForm').reset();
         document.getElementById('groupId').value = '';
+    }
+    // Réinitialiser le formulaire si c'est le modal de paiement mensuel
+    if (modalId === 'monthlyPaymentModal') {
+        const form = document.getElementById('monthlyPaymentForm');
+        if (form) {
+            form.reset();
+        }
+        currentPaymentUser = '';
+        currentPaymentMonth = '';
     }
 }
 
@@ -1269,4 +1291,714 @@ function importData(event) {
         };
         reader.readAsText(file);
     }
+}
+
+// ===== GESTION MENSUELLE =====
+
+function getCurrentMonthKey() {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function initializeMonthlySection() {
+    const monthInput = document.getElementById('selectedMonth');
+    if (monthInput) {
+        monthInput.value = getCurrentMonthKey();
+        loadMonthlyData();
+    }
+}
+
+function loadMonthlyData() {
+    const selectedMonth = document.getElementById('selectedMonth').value;
+    if (!selectedMonth) return;
+
+    const monthData = appData.monthlyBills[selectedMonth];
+    
+    if (monthData) {
+        // Charger les données existantes
+        document.getElementById('loyer').value = monthData.loyer || appData.monthlySettings.loyerDefaut;
+        document.getElementById('electricite').value = monthData.electricite || 0;
+        document.getElementById('eau').value = monthData.eau || 0;
+        document.getElementById('gaz').value = monthData.gaz || 0;
+        document.getElementById('imprevus').value = monthData.imprevus || 0;
+        
+        loadAutresFactures(monthData.autres || []);
+        displayMonthlySummary(selectedMonth, monthData);
+        displayMonthlyDistribution(selectedMonth, monthData);
+        displayPaymentStatus(selectedMonth, monthData);
+        
+        document.getElementById('monthlyForm').style.display = 'block';
+    } else {
+        // Nouveau mois
+        resetMonthlyForm();
+        document.getElementById('monthlySummary').innerHTML = '<p style="text-align: center; color: #cccccc;">Aucune donnée pour ce mois.</p>';
+        document.getElementById('monthlyDistribution').innerHTML = '';
+        document.getElementById('monthlyForm').style.display = 'none';
+    }
+}
+
+function createNewMonthlyBill() {
+    const selectedMonth = document.getElementById('selectedMonth').value;
+    if (!selectedMonth) {
+        showAlert('Veuillez sélectionner un mois.', 'warning');
+        return;
+    }
+
+    resetMonthlyForm();
+    document.getElementById('monthlyForm').style.display = 'block';
+    document.getElementById('monthlySummary').innerHTML = '';
+    document.getElementById('monthlyDistribution').innerHTML = '';
+}
+
+function resetMonthlyForm() {
+    document.getElementById('loyer').value = appData.monthlySettings.loyerDefaut;
+    document.getElementById('electricite').value = 0;
+    document.getElementById('eau').value = 0;
+    document.getElementById('gaz').value = 0;
+    document.getElementById('imprevus').value = 0;
+    document.getElementById('autresFacturesList').innerHTML = '';
+}
+
+function addAutreFacture() {
+    const container = document.getElementById('autresFacturesList');
+    const index = container.children.length;
+    
+    const factureDiv = document.createElement('div');
+    factureDiv.className = 'autre-facture-item';
+    factureDiv.innerHTML = `
+        <div class="form-group">
+            <label>Description :</label>
+            <input type="text" name="autreNom_${index}" placeholder="Ex: Internet, Assurance..." required>
+        </div>
+        <div class="form-group">
+            <label>Montant (DH) :</label>
+            <input type="number" name="autreMontant_${index}" min="0" step="0.01" required>
+        </div>
+        <button type="button" class="remove-facture-btn" onclick="removeAutreFacture(this)">
+            <i class="fas fa-trash"></i>
+        </button>
+    `;
+    
+    container.appendChild(factureDiv);
+}
+
+function removeAutreFacture(button) {
+    button.parentElement.remove();
+}
+
+function loadAutresFactures(autres) {
+    const container = document.getElementById('autresFacturesList');
+    container.innerHTML = '';
+    
+    autres.forEach((facture, index) => {
+        const factureDiv = document.createElement('div');
+        factureDiv.className = 'autre-facture-item';
+        factureDiv.innerHTML = `
+            <div class="form-group">
+                <label>Description :</label>
+                <input type="text" name="autreNom_${index}" value="${facture.nom}" required>
+            </div>
+            <div class="form-group">
+                <label>Montant (DH) :</label>
+                <input type="number" name="autreMontant_${index}" value="${facture.montant}" min="0" step="0.01" required>
+            </div>
+            <button type="button" class="remove-facture-btn" onclick="removeAutreFacture(this)">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+        container.appendChild(factureDiv);
+    });
+}
+
+function saveMonthlyBill(event) {
+    event.preventDefault();
+    
+    const selectedMonth = document.getElementById('selectedMonth').value;
+    if (!selectedMonth) {
+        showAlert('Veuillez sélectionner un mois.', 'warning');
+        return;
+    }
+
+    // Collecter les données du formulaire
+    const billData = {
+        loyer: parseFloat(document.getElementById('loyer').value) || 0,
+        electricite: parseFloat(document.getElementById('electricite').value) || 0,
+        eau: parseFloat(document.getElementById('eau').value) || 0,
+        gaz: parseFloat(document.getElementById('gaz').value) || 0,
+        imprevus: parseFloat(document.getElementById('imprevus').value) || 0,
+        autres: []
+    };
+
+    // Collecter les autres factures
+    const container = document.getElementById('autresFacturesList');
+    for (let i = 0; i < container.children.length; i++) {
+        const nomInput = container.querySelector(`input[name="autreNom_${i}"]`);
+        const montantInput = container.querySelector(`input[name="autreMontant_${i}"]`);
+        
+        if (nomInput && montantInput && nomInput.value.trim()) {
+            billData.autres.push({
+                nom: nomInput.value.trim(),
+                montant: parseFloat(montantInput.value) || 0
+            });
+        }
+    }
+
+    // Sauvegarder
+    appData.monthlyBills[selectedMonth] = billData;
+    saveData();
+    
+    // Afficher le résumé
+    displayMonthlySummary(selectedMonth, billData);
+    displayMonthlyDistribution(selectedMonth, billData);
+    
+    showAlert('Factures mensuelles enregistrées avec succès !', 'success');
+}
+
+function calculateMonthlyTotal(billData) {
+    let total = billData.loyer + billData.electricite + billData.eau + billData.gaz + billData.imprevus;
+    billData.autres.forEach(facture => {
+        total += facture.montant;
+    });
+    return total;
+}
+
+function displayMonthlySummary(month, billData) {
+    const container = document.getElementById('monthlySummary');
+    const total = calculateMonthlyTotal(billData);
+    const nbPersonnes = appData.users.length;
+    const parPersonne = total / nbPersonnes;
+
+    let html = `
+        <h3><i class="fas fa-chart-pie"></i> Récapitulatif - ${month}</h3>
+        <div class="summary-grid">
+            <div class="summary-item">
+                <div class="label">Loyer</div>
+                <div class="amount">${billData.loyer.toFixed(2)} DH</div>
+            </div>
+            <div class="summary-item">
+                <div class="label">Électricité</div>
+                <div class="amount">${billData.electricite.toFixed(2)} DH</div>
+            </div>
+            <div class="summary-item">
+                <div class="label">Eau</div>
+                <div class="amount">${billData.eau.toFixed(2)} DH</div>
+            </div>
+            <div class="summary-item">
+                <div class="label">Gaz</div>
+                <div class="amount">${billData.gaz.toFixed(2)} DH</div>
+            </div>
+            <div class="summary-item">
+                <div class="label">Imprévus</div>
+                <div class="amount">${billData.imprevus.toFixed(2)} DH</div>
+            </div>
+    `;
+
+    billData.autres.forEach(facture => {
+        html += `
+            <div class="summary-item">
+                <div class="label">${facture.nom}</div>
+                <div class="amount">${facture.montant.toFixed(2)} DH</div>
+            </div>
+        `;
+    });
+
+    html += `
+        </div>
+        <div class="total-summary">
+            <div class="total-amount">${total.toFixed(2)} DH</div>
+            <div class="per-person">${parPersonne.toFixed(2)} DH par personne (${nbPersonnes} personnes)</div>
+        </div>
+    `;
+
+    container.innerHTML = html;
+}
+
+function displayMonthlyDistribution(month, billData) {
+    const container = document.getElementById('monthlyDistribution');
+    const total = calculateMonthlyTotal(billData);
+    const nbPersonnes = appData.users.length;
+    const parPersonne = total / nbPersonnes;
+
+    // Initialiser les paiements pour ce mois si nécessaire
+    if (!appData.monthlyPayments[month]) {
+        appData.monthlyPayments[month] = {};
+    }
+
+    let html = `
+        <h3><i class="fas fa-users"></i> Répartition par Colocataire</h3>
+        <table class="distribution-table">
+            <thead>
+                <tr>
+                    <th>Colocataire</th>
+                    <th>Part à payer</th>
+                    <th>Statut</th>
+                    <th class="payment-column">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    appData.users.forEach(user => {
+        const userName = user.name || user;
+        const userPayments = appData.monthlyPayments[month][userName] || { paid: 0, remaining: parPersonne, payments: [] };
+        
+        // Calculer le statut
+        let statusClass = 'status-unpaid';
+        let statusText = 'En attente';
+        let statusDetails = '';
+        
+        if (userPayments.paid >= parPersonne) {
+            statusClass = 'status-paid';
+            statusText = 'Payé';
+            if (userPayments.paid > parPersonne) {
+                statusDetails = `<div class="payment-details">Surplus: ${(userPayments.paid - parPersonne).toFixed(2)} DH</div>`;
+            }
+        } else if (userPayments.paid > 0) {
+            statusClass = 'status-partial';
+            statusText = 'Partiel';
+            statusDetails = `<div class="payment-details">Payé: ${userPayments.paid.toFixed(2)} DH<br>Reste: ${(parPersonne - userPayments.paid).toFixed(2)} DH</div>`;
+        }
+
+        html += `
+            <tr>
+                <td>${userName}</td>
+                <td>${parPersonne.toFixed(2)} DH</td>
+                <td>
+                    <span class="${statusClass}">${statusText}</span>
+                    ${statusDetails}
+                </td>
+                <td class="payment-actions">
+                    <button class="payment-btn" onclick="openPaymentModal('${userName}', '${month}')">
+                        <i class="fas fa-plus"></i> Paiement
+                    </button>
+                    ${userPayments.payments.length > 0 ? `
+                        <button class="payment-btn partial" onclick="showPaymentHistory('${userName}', '${month}')">
+                            <i class="fas fa-history"></i> Historique
+                        </button>
+                    ` : ''}
+                </td>
+            </tr>
+        `;
+    });
+
+    html += `
+            </tbody>
+        </table>
+        <div style="margin-top: 20px; text-align: center;">
+            <button class="btn btn-primary" onclick="exportMonthlyBill('${month}')">
+                <i class="fas fa-download"></i> Exporter la liste
+            </button>
+        </div>
+    `;
+
+    container.innerHTML = html;
+}
+
+function exportMonthlyBill(month) {
+    const billData = appData.monthlyBills[month];
+    if (!billData) {
+        showAlert('Aucune donnée à exporter pour ce mois.', 'warning');
+        return;
+    }
+
+    const total = calculateMonthlyTotal(billData);
+    const nbPersonnes = appData.users.length;
+    const parPersonne = total / nbPersonnes;
+
+    let content = `FACTURES MENSUELLES - ${month}\n`;
+    content += `${'='.repeat(50)}\n\n`;
+    
+    content += `DÉTAIL DES CHARGES :\n`;
+    content += `- Loyer : ${billData.loyer.toFixed(2)} DH\n`;
+    content += `- Électricité : ${billData.electricite.toFixed(2)} DH\n`;
+    content += `- Eau : ${billData.eau.toFixed(2)} DH\n`;
+    content += `- Gaz : ${billData.gaz.toFixed(2)} DH\n`;
+    content += `- Imprévus : ${billData.imprevus.toFixed(2)} DH\n`;
+    
+    billData.autres.forEach(facture => {
+        content += `- ${facture.nom} : ${facture.montant.toFixed(2)} DH\n`;
+    });
+    
+    content += `\nTOTAL : ${total.toFixed(2)} DH\n`;
+    content += `NOMBRE DE PERSONNES : ${nbPersonnes}\n`;
+    content += `PART PAR PERSONNE : ${parPersonne.toFixed(2)} DH\n\n`;
+    
+    content += `RÉPARTITION :\n`;
+    content += `${'='.repeat(30)}\n`;
+    appData.users.forEach(user => {
+        const userName = user.name || user;
+        content += `${userName} : ${parPersonne.toFixed(2)} DH\n`;
+    });
+
+    // Créer et télécharger le fichier
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `factures_${month}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showAlert('Liste exportée avec succès !', 'success');
+}
+
+function cancelMonthlyForm() {
+    document.getElementById('monthlyForm').style.display = 'none';
+    loadMonthlyData();
+}
+
+// ===== GESTION PAIEMENTS MENSUELS =====
+
+let currentPaymentUser = '';
+let currentPaymentMonth = '';
+
+function openPaymentModal(userName, month) {
+    currentPaymentUser = userName;
+    currentPaymentMonth = month;
+    
+    const billData = appData.monthlyBills[month];
+    if (!billData) {
+        showAlert('Aucune facture trouvée pour ce mois.', 'warning');
+        return;
+    }
+    
+    const total = calculateMonthlyTotal(billData);
+    const parPersonne = total / appData.users.length;
+    
+    // Initialiser les données de paiement si nécessaire
+    if (!appData.monthlyPayments[month]) {
+        appData.monthlyPayments[month] = {};
+    }
+    
+    if (!appData.monthlyPayments[month][userName]) {
+        appData.monthlyPayments[month][userName] = {
+            paid: 0,
+            remaining: parPersonne,
+            payments: []
+        };
+    }
+    
+    const userPayments = appData.monthlyPayments[month][userName];
+    
+    // Remplir les informations utilisateur
+    document.getElementById('paymentUserInfo').innerHTML = `
+        <h4>${userName}</h4>
+        <p><strong>Mois :</strong> ${month}</p>
+        <p><strong>Derniers paiements :</strong> ${userPayments.payments.length} paiement(s)</p>
+    `;
+    
+    // Remplir le résumé
+    document.getElementById('totalToPay').textContent = `${parPersonne.toFixed(2)} DH`;
+    document.getElementById('alreadyPaid').textContent = `${userPayments.paid.toFixed(2)} DH`;
+    document.getElementById('remainingToPay').textContent = `${Math.max(0, parPersonne - userPayments.paid).toFixed(2)} DH`;
+    
+    // Réinitialiser le formulaire
+    document.getElementById('paymentAmount').value = '';
+    document.getElementById('paymentNote').value = '';
+    
+    // Afficher le modal
+    document.getElementById('monthlyPaymentModal').style.display = 'block';
+}
+
+function saveMonthlyPayment(event) {
+    event.preventDefault();
+    
+    console.log('saveMonthlyPayment appelée');
+    console.log('currentPaymentUser:', currentPaymentUser);
+    console.log('currentPaymentMonth:', currentPaymentMonth);
+    
+    const amountInput = document.getElementById('paymentAmount');
+    const amount = parseFloat(amountInput.value);
+    const note = document.getElementById('paymentNote').value.trim();
+    
+    console.log('Montant saisi:', amountInput.value, 'Montant parsé:', amount);
+    
+    if (!amountInput.value || isNaN(amount) || amount <= 0) {
+        showAlert('Veuillez saisir un montant valide.', 'warning');
+        return;
+    }
+    
+    if (!currentPaymentUser || !currentPaymentMonth) {
+        showAlert('Erreur : informations de paiement manquantes.', 'error');
+        return;
+    }
+    
+    // Initialiser les données de paiement si nécessaire
+    if (!appData.monthlyPayments[currentPaymentMonth]) {
+        appData.monthlyPayments[currentPaymentMonth] = {};
+    }
+    
+    if (!appData.monthlyPayments[currentPaymentMonth][currentPaymentUser]) {
+        const billData = appData.monthlyBills[currentPaymentMonth];
+        const total = calculateMonthlyTotal(billData);
+        const parPersonne = total / appData.users.length;
+        
+        appData.monthlyPayments[currentPaymentMonth][currentPaymentUser] = {
+            paid: 0,
+            remaining: parPersonne,
+            payments: []
+        };
+    }
+    
+    const userPayments = appData.monthlyPayments[currentPaymentMonth][currentPaymentUser];
+    
+    // Ajouter le nouveau paiement
+    const payment = {
+        amount: amount,
+        date: new Date().toISOString().split('T')[0],
+        note: note || ''
+    };
+    
+    userPayments.payments.push(payment);
+    userPayments.paid += amount;
+    
+    const billData = appData.monthlyBills[currentPaymentMonth];
+    const total = calculateMonthlyTotal(billData);
+    const parPersonne = total / appData.users.length;
+    userPayments.remaining = Math.max(0, parPersonne - userPayments.paid);
+    
+    // Sauvegarder
+    saveData();
+    
+    // Fermer le modal
+    closeModal('monthlyPaymentModal');
+    
+    // Rafraîchir l'affichage
+    displayMonthlyDistribution(currentPaymentMonth, billData);
+    displayPaymentStatus(currentPaymentMonth, billData);
+    
+    showAlert(`Paiement de ${amount.toFixed(2)} DH enregistré pour ${currentPaymentUser}`, 'success');
+}
+
+function showPaymentHistory(userName, month) {
+    const userPayments = appData.monthlyPayments[month][userName];
+    if (!userPayments || userPayments.payments.length === 0) {
+        showAlert('Aucun historique de paiement trouvé.', 'info');
+        return;
+    }
+    
+    let historyHtml = `
+        <div style="background: #2a2a2a; padding: 20px; border-radius: 10px; margin: 20px 0;">
+            <h3 style="color: #d4af37; margin-bottom: 15px;">
+                <i class="fas fa-history"></i> Historique des paiements - ${userName}
+            </h3>
+            <p style="color: #cccccc; margin-bottom: 15px;">
+                <strong>Mois :</strong> ${month} | 
+                <strong>Total payé :</strong> ${userPayments.paid.toFixed(2)} DH
+            </p>
+            <div class="payment-history">
+    `;
+    
+    userPayments.payments.forEach((payment, index) => {
+        historyHtml += `
+            <div class="payment-item">
+                <div class="payment-amount">${payment.amount.toFixed(2)} DH</div>
+                <div class="payment-date">${formatDate(payment.date)}</div>
+                ${payment.note ? `<div class="payment-note">"${payment.note}"</div>` : ''}
+                <button onclick="removePayment('${userName}', '${month}', ${index})" 
+                        style="float: right; background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer;">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+    });
+    
+    historyHtml += `
+            </div>
+            <div style="text-align: center; margin-top: 15px;">
+                <button onclick="this.parentElement.parentElement.remove()" 
+                        class="btn btn-secondary">Fermer</button>
+            </div>
+        </div>
+    `;
+    
+    // Ajouter l'historique à la page
+    const container = document.getElementById('monthlyDistribution');
+    container.insertAdjacentHTML('afterend', historyHtml);
+}
+
+function removePayment(userName, month, paymentIndex) {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce paiement ?')) {
+        return;
+    }
+    
+    const userPayments = appData.monthlyPayments[month][userName];
+    const removedPayment = userPayments.payments[paymentIndex];
+    
+    // Retirer le montant du total payé
+    userPayments.paid -= removedPayment.amount;
+    
+    // Supprimer le paiement de la liste
+    userPayments.payments.splice(paymentIndex, 1);
+    
+    // Recalculer le reste à payer
+    const billData = appData.monthlyBills[month];
+    const total = calculateMonthlyTotal(billData);
+    const parPersonne = total / appData.users.length;
+    userPayments.remaining = Math.max(0, parPersonne - userPayments.paid);
+    
+    // Sauvegarder
+    saveData();
+    
+    // Rafraîchir l'affichage
+    displayMonthlyDistribution(month, billData);
+    displayPaymentStatus(month, billData);
+    
+    // Fermer l'historique
+    const historyElement = document.querySelector('.payment-history');
+    if (historyElement) {
+        historyElement.closest('div').remove();
+    }
+    
+    showAlert('Paiement supprimé avec succès.', 'success');
+}
+
+function displayPaymentStatus(month, billData) {
+    const total = calculateMonthlyTotal(billData);
+    const parPersonne = total / appData.users.length;
+    
+    // Initialiser les paiements pour ce mois si nécessaire
+    if (!appData.monthlyPayments[month]) {
+        appData.monthlyPayments[month] = {};
+        appData.users.forEach(user => {
+            const userName = user.name || user;
+            appData.monthlyPayments[month][userName] = {
+                paid: 0,
+                remaining: parPersonne,
+                payments: []
+            };
+        });
+    }
+    
+    let totalCollected = 0;
+    let totalRemaining = 0;
+    let paidUsers = 0;
+    let partialUsers = 0;
+    let pendingUsers = 0;
+    
+    // Calculer les statistiques
+    appData.users.forEach(user => {
+        const userName = user.name || user;
+        const userPayments = appData.monthlyPayments[month][userName] || { paid: 0, remaining: parPersonne, payments: [] };
+        totalCollected += userPayments.paid;
+        totalRemaining += Math.max(0, parPersonne - userPayments.paid);
+        
+        if (userPayments.paid >= parPersonne) {
+            paidUsers++;
+        } else if (userPayments.paid > 0) {
+            partialUsers++;
+        } else {
+            pendingUsers++;
+        }
+    });
+    
+    // Afficher la vue d'ensemble
+    const overviewHtml = `
+        <div class="payment-stats">
+            <div class="stat-card total">
+                <div class="stat-value">${total.toFixed(2)} DH</div>
+                <div class="stat-label">Total à collecter</div>
+            </div>
+            <div class="stat-card collected">
+                <div class="stat-value">${totalCollected.toFixed(2)} DH</div>
+                <div class="stat-label">Collecté</div>
+            </div>
+            <div class="stat-card remaining">
+                <div class="stat-value">${totalRemaining.toFixed(2)} DH</div>
+                <div class="stat-label">Restant</div>
+            </div>
+            <div class="stat-card progress">
+                <div class="stat-value">${((totalCollected / total) * 100).toFixed(1)}%</div>
+                <div class="stat-label">Progression</div>
+            </div>
+        </div>
+        
+        <div class="payment-summary">
+            <div class="summary-item paid">
+                <i class="fas fa-check-circle"></i>
+                <span>${paidUsers} payé(s) complet</span>
+            </div>
+            <div class="summary-item partial">
+                <i class="fas fa-clock"></i>
+                <span>${partialUsers} paiement(s) partiel(s)</span>
+            </div>
+            <div class="summary-item pending">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>${pendingUsers} en attente</span>
+            </div>
+        </div>
+    `;
+    
+    // Afficher les détails par utilisateur
+    let detailsHtml = '<div class="payment-users-grid">';
+    
+    appData.users.forEach(user => {
+        const userName = user.name || user;
+        const userPayments = appData.monthlyPayments[month][userName] || { paid: 0, remaining: parPersonne, payments: [] };
+        const percentage = (userPayments.paid / parPersonne) * 100;
+        
+        let statusClass = 'pending';
+        let statusIcon = 'fas fa-exclamation-circle';
+        let statusText = 'En attente';
+        
+        if (userPayments.paid >= parPersonne) {
+            statusClass = 'paid';
+            statusIcon = 'fas fa-check-circle';
+            statusText = 'Payé';
+        } else if (userPayments.paid > 0) {
+            statusClass = 'partial';
+            statusIcon = 'fas fa-clock';
+            statusText = 'Partiel';
+        }
+        
+        detailsHtml += `
+            <div class="payment-user-card ${statusClass}">
+                <div class="user-header">
+                    <h4>${userName}</h4>
+                    <span class="status-badge ${statusClass}">
+                        <i class="${statusIcon}"></i> ${statusText}
+                    </span>
+                </div>
+                <div class="payment-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${Math.min(100, percentage)}%"></div>
+                    </div>
+                    <div class="progress-text">${percentage.toFixed(1)}%</div>
+                </div>
+                <div class="payment-amounts">
+                    <div class="amount-item">
+                        <span class="label">Payé :</span>
+                        <span class="value">${userPayments.paid.toFixed(2)} DH</span>
+                    </div>
+                    <div class="amount-item">
+                        <span class="label">Restant :</span>
+                        <span class="value">${Math.max(0, parPersonne - userPayments.paid).toFixed(2)} DH</span>
+                    </div>
+                    <div class="amount-item">
+                        <span class="label">Paiements :</span>
+                        <span class="value">${userPayments.payments.length}</span>
+                    </div>
+                </div>
+                <div class="user-actions">
+                    <button onclick="openPaymentModal('${userName}', '${month}')" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus"></i> Paiement
+                    </button>
+                    ${userPayments.payments.length > 0 ? `
+                        <button onclick="showPaymentHistory('${userName}', '${month}')" class="btn btn-sm btn-secondary">
+                            <i class="fas fa-history"></i> Historique
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    });
+    
+    detailsHtml += '</div>';
+    
+    // Mettre à jour l'affichage
+    document.getElementById('paymentOverview').innerHTML = overviewHtml;
+    document.getElementById('paymentDetails').innerHTML = detailsHtml;
+    document.getElementById('paymentStatusSection').style.display = 'block';
 }

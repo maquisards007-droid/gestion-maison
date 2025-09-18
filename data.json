@@ -2,7 +2,23 @@
   "adminPassword": "admin123",
   "weeklyAmount": 100,
   "siteTitle": "Gestion Cotisation Étudiante",
-  "users": [],
+  "users": [
+    {
+      "id": "1758170614102",
+      "name": "HJGHKJ",
+      "createdAt": "2025-09-18T04:43:34.102Z"
+    },
+    {
+      "id": "1758170617033",
+      "name": "KLJKH",
+      "createdAt": "2025-09-18T04:43:37.033Z"
+    },
+    {
+      "id": "1758170620156",
+      "name": "IOU",
+      "createdAt": "2025-09-18T04:43:40.156Z"
+    }
+  ],
   "currentWeek": "2025-09-15",
   "payments": [
     {
@@ -188,6 +204,34 @@
       "poulet",
       "repos"
     ]
+  },
+  "monthlyBills": {
+    "2025-09": {
+      "loyer": 4500,
+      "electricite": 0,
+      "eau": 0,
+      "gaz": 0,
+      "imprevus": 0,
+      "autres": []
+    }
+  },
+  "monthlyPayments": {
+    "2025-09": {
+      "[object Object]": {
+        "paid": 12,
+        "remaining": 1488,
+        "payments": [
+          {
+            "amount": 12,
+            "date": "2025-09-18",
+            "note": "FDGF"
+          }
+        ]
+      }
+    }
+  },
+  "monthlySettings": {
+    "loyerDefaut": 4500
   },
   "settings": {
     "adminPassword": "admin123"

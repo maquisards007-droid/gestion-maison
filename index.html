@@ -70,6 +70,9 @@
                 <button class="nav-btn" onclick="showAdminSection('groups')">
                     <i class="fas fa-users-cog"></i> Groupes
                 </button>
+                <button class="nav-btn" onclick="showAdminSection('monthly')">
+                    <i class="fas fa-file-invoice-dollar"></i> Gestion Mensuelle
+                </button>
                 <button class="nav-btn" onclick="showAdminSection('settings')">
                     <i class="fas fa-cog"></i> Paramètres
                 </button>
@@ -179,6 +182,86 @@
                         <div id="groupsList">
                             <!-- Liste des groupes sera affichée ici -->
                         </div>
+                    </div>
+                </section>
+
+                <!-- Gestion Mensuelle -->
+                <section id="monthly" class="admin-section">
+                    <h2><i class="fas fa-file-invoice-dollar"></i> Gestion Mensuelle des Charges</h2>
+                    
+                    <div class="monthly-controls">
+                        <div class="month-selector">
+                            <label for="selectedMonth">Mois :</label>
+                            <input type="month" id="selectedMonth" onchange="loadMonthlyData()">
+                        </div>
+                        <button class="btn btn-primary" onclick="createNewMonthlyBill()">
+                            <i class="fas fa-plus"></i> Nouveau Mois
+                        </button>
+                    </div>
+
+                    <div class="monthly-form" id="monthlyForm" style="display: none;">
+                        <h3>Saisie des Factures</h3>
+                        <form onsubmit="saveMonthlyBill(event)">
+                            <div class="bills-grid">
+                                <div class="form-group">
+                                    <label for="loyer">Loyer (DH) :</label>
+                                    <input type="number" id="loyer" value="4500" min="0" step="0.01" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="electricite">Électricité (DH) :</label>
+                                    <input type="number" id="electricite" value="0" min="0" step="0.01" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="eau">Eau (DH) :</label>
+                                    <input type="number" id="eau" value="0" min="0" step="0.01" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="gaz">Gaz (DH) :</label>
+                                    <input type="number" id="gaz" value="0" min="0" step="0.01" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="imprevus">Imprévus (DH) :</label>
+                                    <input type="number" id="imprevus" value="0" min="0" step="0.01" required>
+                                </div>
+                            </div>
+
+                            <div class="autres-factures">
+                                <h4>Autres Factures</h4>
+                                <div id="autresFacturesList">
+                                    <!-- Autres factures dynamiques -->
+                                </div>
+                                <button type="button" class="btn btn-secondary" onclick="addAutreFacture()">
+                                    <i class="fas fa-plus"></i> Ajouter une facture
+                                </button>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Enregistrer
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="cancelMonthlyForm()">
+                                    <i class="fas fa-times"></i> Annuler
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="monthly-summary" id="monthlySummary">
+                        <!-- Récapitulatif mensuel sera affiché ici -->
+                    </div>
+
+                    <div class="payment-status-section" id="paymentStatusSection" style="display: none;">
+                        <h3><i class="fas fa-chart-pie"></i> Statut des Paiements</h3>
+                        <div class="payment-overview" id="paymentOverview">
+                            <!-- Vue d'ensemble des paiements -->
+                        </div>
+                        <div class="payment-details" id="paymentDetails">
+                            <!-- Détails des paiements par utilisateur -->
+                        </div>
+                    </div>
+
+                    <div class="monthly-distribution" id="monthlyDistribution">
+                        <!-- Répartition par personne sera affichée ici -->
                     </div>
                 </section>
 
@@ -354,6 +437,48 @@
                 </div>
                 <button type="submit" class="btn btn-primary">Sauvegarder</button>
                 <button type="button" class="btn btn-secondary" onclick="closeModal('groupModal')">Annuler</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Paiement Mensuel -->
+    <div id="monthlyPaymentModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('monthlyPaymentModal')">&times;</span>
+            <h2><i class="fas fa-money-bill-wave"></i> Enregistrer un Paiement</h2>
+            <form id="monthlyPaymentForm" onsubmit="saveMonthlyPayment(event)">
+                <div class="form-group">
+                    <label>Colocataire :</label>
+                    <div id="paymentUserInfo" class="user-payment-info">
+                        <!-- Informations utilisateur -->
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="paymentAmount">Montant payé (DH) :</label>
+                    <input type="number" id="paymentAmount" min="0" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="paymentNote">Note (optionnel) :</label>
+                    <input type="text" id="paymentNote" placeholder="Ex: Paiement partiel, espèces...">
+                </div>
+                <div class="payment-summary">
+                    <div class="summary-row">
+                        <span>Montant total à payer :</span>
+                        <span id="totalToPay">0.00 DH</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Déjà payé :</span>
+                        <span id="alreadyPaid">0.00 DH</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Reste à payer :</span>
+                        <span id="remainingToPay">0.00 DH</span>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-check"></i> Enregistrer le Paiement
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('monthlyPaymentModal')">Annuler</button>
             </form>
         </div>
     </div>
