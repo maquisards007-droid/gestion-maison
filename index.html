@@ -235,6 +235,32 @@
                 </form>
             </div>
 
+            <div class="debt-section">
+                <h3><i class="fas fa-plus-circle"></i> Ajouter une dette</h3>
+                <p class="debt-description">Vous avez fait des achats imprévus pour la maison ? Ajoutez le montant qu'on vous doit !</p>
+                <form id="debtForm">
+                    <div class="form-group">
+                        <label for="debtUserName">Votre nom :</label>
+                        <select id="debtUserName" required>
+                            <option value="">Sélectionnez votre nom</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="debtAmount">Montant dû (DH) :</label>
+                        <input type="number" id="debtAmount" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="debtDescription">Description (optionnel) :</label>
+                        <input type="text" id="debtDescription" placeholder="Ex: Courses, produits ménage...">
+                    </div>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Ajouter la dette
+                    </button>
+                </form>
+            </div>
+
+
+
             <div class="status-overview">
                 <h3>Statut des paiements cette semaine</h3>
                 <div id="publicStatusTable"></div>

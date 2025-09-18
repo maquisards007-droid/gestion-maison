@@ -39,6 +39,7 @@ app.use(express.static(__dirname, {
 const defaultData = {
   users: [],
   payments: [],
+  debts: {},
   groups: [],
   groupRotation: {
     startWeek: null,
@@ -151,6 +152,28 @@ io.on('connection', (socket) => {
     await saveData(appData);
     io.emit('paymentAdded', payment);
   });
+
+  socket.on('debt', async (data) => {
+    const { data: debt, userName } = data;
+    
+    // Initialiser les dettes pour la semaine si nécessaire
+    if (!appData.debts[debt.week]) {
+      appData.debts[debt.week] = {};
+    }
+    
+    // Initialiser les dettes pour l'utilisateur si nécessaire
+    if (!appData.debts[debt.week][userName]) {
+      appData.debts[debt.week][userName] = [];
+    }
+    
+    // Ajouter la dette
+    appData.debts[debt.week][userName].push(debt);
+    
+    await saveData(appData);
+    io.emit('debtAdded', { debt, userName });
+  });
+
+
 
   socket.on('groupAdded', async (group) => {
     appData.groups.push(group);

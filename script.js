@@ -6,6 +6,7 @@ let appData = {
     users: ['Ahmed', 'Fatima', 'Youssef', 'Aicha'],
     currentWeek: getCurrentWeekKey(),
     payments: {},
+    debts: {},
     history: {},
     groups: [],
     groupRotation: {
@@ -20,6 +21,7 @@ let isConnected = false;
 
 // Initialisation de l'application
 document.addEventListener('DOMContentLoaded', function() {
+    loadData(); // Charger les données sauvegardées avant l'initialisation
     initializeWebSocket();
     initializeApp();
 });
@@ -136,7 +138,29 @@ function initializeWebSocket() {
             showAlert(`Paiement de ${payment.userName} enregistré`, 'success');
         }
     });
-    
+
+    socket.on('debtAdded', (data) => {
+        const { debt, userName } = data;
+        
+        // Initialiser les dettes pour la semaine si nécessaire
+        if (!appData.debts[debt.week]) {
+            appData.debts[debt.week] = {};
+        }
+        
+        // Initialiser les dettes pour l'utilisateur si nécessaire
+        if (!appData.debts[debt.week][userName]) {
+            appData.debts[debt.week][userName] = [];
+        }
+        
+        // Vérifier si la dette n'existe pas déjà
+        const existingDebt = appData.debts[debt.week][userName].find(d => d.id === debt.id);
+        if (!existingDebt) {
+            appData.debts[debt.week][userName].push(debt);
+            updateAllDisplays();
+            showAlert(`Dette de ${userName} enregistrée: ${debt.amount}€`, 'success');
+        }
+    });
+
     socket.on('groupAdded', (group) => {
         if (!appData.groups.find(g => g.id === group.id)) {
             appData.groups.push(group);
@@ -245,12 +269,14 @@ function initializeApp() {
     updatePublicSiteTitle();
     updatePublicWeeklyAmount();
     populateUserSelect();
+    populateDebtUserSelect();
     
     // Event listeners
     document.getElementById('adminLoginForm').addEventListener('submit', handleAdminLogin);
     document.getElementById('addUserForm').addEventListener('submit', handleAddUser);
     document.getElementById('groupForm').addEventListener('submit', saveGroup);
     document.getElementById('paymentForm').addEventListener('submit', handlePayment);
+    document.getElementById('debtForm').addEventListener('submit', handleDebt);
 }
 
 // Gestion de l'affichage des pages
@@ -353,35 +379,62 @@ function updateAdminDashboard() {
 function updateWeeklyStatusTable() {
     const container = document.getElementById('weeklyStatusTable');
     const currentWeekPayments = appData.payments[appData.currentWeek] || {};
+    const currentWeekDebts = appData.debts[appData.currentWeek] || {};
     
-    let html = '<table class="table"><thead><tr><th>Colocataire</th><th>Statut</th><th>Montant</th><th>Surplus/Déficit</th></tr></thead><tbody>';
+    let html = '<table class="table"><thead><tr><th>Colocataire</th><th>Statut</th><th>Montant</th><th>Surplus/Déficit</th><th>Crédit Final</th></tr></thead><tbody>';
     
     appData.users.forEach(user => {
         const userName = user.name || user;
         const payment = currentWeekPayments[userName];
+        const userDebts = currentWeekDebts[userName] || [];
+        const totalDebts = userDebts.reduce((sum, debt) => sum + debt.amount, 0);
+        
         let status, amount, surplus;
+        let finalCredit = '';
         
         if (payment) {
             amount = `${payment.amount} DH`;
-            const diff = payment.amount - appData.weeklyAmount;
+            const surplusAmount = payment.amount - appData.weeklyAmount;
             
-            if (diff > 0) {
+            if (surplusAmount > 0) {
                 status = '<span class="status-surplus">Payé (Surplus)</span>';
-                surplus = `+${diff} DH`;
-            } else if (diff === 0) {
+                surplus = `+${surplusAmount} DH`;
+                
+                // Calculer le crédit final (surplus + dettes supplémentaires)
+                const finalCreditAmount = surplusAmount + totalDebts;
+                if (finalCreditAmount > 0) {
+                    finalCredit = `<span class="credit-amount">On lui doit ${finalCreditAmount} DH</span>`;
+                } else if (finalCreditAmount < 0) {
+                    finalCredit = `<span class="debt-amount">Il nous doit ${Math.abs(finalCreditAmount)} DH</span>`;
+                } else {
+                    finalCredit = '<span class="no-debt">Équilibré</span>';
+                }
+            } else if (surplusAmount === 0) {
                 status = '<span class="status-paid">Payé</span>';
                 surplus = '0 DH';
+                
+                if (totalDebts > 0) {
+                    finalCredit = `<span class="credit-amount">On lui doit ${totalDebts} DH</span>`;
+                } else if (totalDebts < 0) {
+                    finalCredit = `<span class="credit-amount">On lui doit ${Math.abs(totalDebts)} DH</span>`;
+                } else {
+                    finalCredit = '<span class="no-debt">Équilibré</span>';
+                }
             } else {
                 status = '<span class="status-unpaid">Insuffisant</span>';
-                surplus = `${diff} DH`;
+                surplus = `${surplusAmount} DH`;
+                const totalOwed = Math.abs(surplusAmount) + totalDebts;
+                finalCredit = `<span class="debt-amount">Il nous doit ${totalOwed} DH</span>`;
             }
         } else {
             status = '<span class="status-unpaid">Non payé</span>';
             amount = '0 DH';
             surplus = `-${appData.weeklyAmount} DH`;
+            const totalOwed = appData.weeklyAmount + totalDebts;
+            finalCredit = `<span class="debt-amount">Il nous doit ${totalOwed} DH</span>`;
         }
         
-        html += `<tr><td>${userName}</td><td>${status}</td><td>${amount}</td><td>${surplus}</td></tr>`;
+        html += `<tr><td>${userName}</td><td>${status}</td><td>${amount}</td><td>${surplus}</td><td>${finalCredit}</td></tr>`;
     });
     
     html += '</tbody></table>';
@@ -599,9 +652,12 @@ function updateFullHistory() {
 // Espace public
 function updatePublicSpace() {
     updateCurrentWeekDisplay();
+    updatePublicSiteTitle();
+    updatePublicWeeklyAmount();
+    populateUserSelect();
+    populateDebtUserSelect();
     updatePublicStatusTable();
     updatePublicHistory();
-    populateUserSelect();
     displayGroupTasks();
 }
 
@@ -631,31 +687,81 @@ function populateUserSelect() {
     });
 }
 
+function populateDebtUserSelect() {
+    const debtUserSelect = document.getElementById('debtUserName');
+    if (!debtUserSelect) return;
+    
+    debtUserSelect.innerHTML = '<option value="">Sélectionnez votre nom</option>';
+    
+    appData.users.forEach(user => {
+        const option = document.createElement('option');
+        option.value = user.name || user;
+        option.textContent = user.name || user;
+        debtUserSelect.appendChild(option);
+    });
+}
+
 function updatePublicStatusTable() {
     const container = document.getElementById('publicStatusTable');
     const currentWeekPayments = appData.payments[appData.currentWeek] || {};
+    const currentWeekDebts = appData.debts[appData.currentWeek] || {};
     
-    let html = '<table class="table"><thead><tr><th>Colocataire</th><th>Statut</th></tr></thead><tbody>';
+    let html = '<table class="table"><thead><tr><th>Colocataire</th><th>Statut</th><th>Crédit/Dette</th></tr></thead><tbody>';
     
     appData.users.forEach(user => {
         const userName = user.name || user;
         const payment = currentWeekPayments[userName];
+        const userDebts = currentWeekDebts[userName] || [];
+        
+        // Calculer le total des dettes supplémentaires (achats imprévus)
+        const totalDebts = userDebts.reduce((sum, debt) => sum + debt.amount, 0);
+        
         let status;
+        let creditDebtDisplay = '';
         
         if (payment) {
-            const diff = payment.amount - appData.weeklyAmount;
-            if (diff > 0) {
-                status = '<span class="status-surplus">✓ Payé (Surplus)</span>';
-            } else if (diff === 0) {
+            const surplus = payment.amount - appData.weeklyAmount;
+            
+            if (surplus > 0) {
+                // Surplus de paiement - crédit automatique
+                status = '<span class="status-surplus">✓ Payé</span>';
+                const totalCredit = surplus + totalDebts; // Surplus PLUS les dépenses imprévues = crédit total
+                
+                if (totalCredit > 0) {
+                    creditDebtDisplay = `<span class="credit-amount">On vous doit ${totalCredit} DH</span>`;
+                } else if (totalCredit < 0) {
+                    creditDebtDisplay = `<span class="debt-amount">Vous nous devez ${Math.abs(totalCredit)} DH</span>`;
+                } else {
+                    creditDebtDisplay = '<span class="no-debt">-</span>';
+                }
+            } else if (surplus === 0) {
+                // Paiement exact
                 status = '<span class="status-paid">✓ Payé</span>';
+                
+                if (totalDebts > 0) {
+                    creditDebtDisplay = `<span class="credit-amount">On vous doit ${totalDebts} DH</span>`;
+                    if (userDebts.length > 1) {
+                        creditDebtDisplay += ` <small>(${userDebts.length} achats)</small>`;
+                    }
+                } else if (totalDebts < 0) {
+                    creditDebtDisplay = `<span class="credit-amount">On vous doit ${Math.abs(totalDebts)} DH</span>`;
+                } else {
+                    creditDebtDisplay = '<span class="no-debt">-</span>';
+                }
             } else {
+                // Paiement insuffisant
                 status = '<span class="status-unpaid">⚠ Insuffisant</span>';
+                const totalOwed = Math.abs(surplus) + totalDebts;
+                creditDebtDisplay = `<span class="debt-amount">Vous nous devez ${totalOwed} DH</span>`;
             }
         } else {
+            // Pas de paiement
             status = '<span class="status-unpaid">✗ Non payé</span>';
+            const totalOwed = appData.weeklyAmount + totalDebts;
+            creditDebtDisplay = `<span class="debt-amount">Vous nous devez ${totalOwed} DH</span>`;
         }
         
-        html += `<tr><td>${userName}</td><td>${status}</td></tr>`;
+        html += `<tr><td>${userName}</td><td>${status}</td><td>${creditDebtDisplay}</td></tr>`;
     });
     
     html += '</tbody></table>';
@@ -685,7 +791,7 @@ function updatePublicHistory() {
                         <h4>Semaine du ${getWeekDateRange(weekKey)} ${isCurrentWeek ? '(Actuelle)' : ''}</h4>
                         <table class="table">
                             <thead>
-                                <tr><th>Colocataire</th><th>Statut</th></tr>
+                                <tr><th>Colocataire</th><th>Statut</th><th>Crédit/Dette</th></tr>
                             </thead>
                             <tbody>
                 `;
@@ -693,22 +799,41 @@ function updatePublicHistory() {
                 weekData.users.forEach(user => {
                     const userName = user.name || user;
                     const payment = weekData.payments[userName];
+                    const weekDebts = isCurrentWeek ? (appData.debts[weekKey] || {})[userName] || [] : (weekData.debts || {})[userName] || [];
+                    const totalDebts = weekDebts.reduce((sum, debt) => sum + debt.amount, 0);
+                    
                     let status;
+                    let creditDebtDisplay = '';
                     
                     if (payment) {
-                        const diff = payment.amount - weekData.weeklyAmount;
-                        if (diff > 0) {
+                        const surplus = payment.amount - weekData.weeklyAmount;
+                        if (surplus > 0) {
                             status = '<span class="status-surplus">✓ Payé (Surplus)</span>';
-                        } else if (diff === 0) {
+                            const totalCredit = surplus + totalDebts;
+                            creditDebtDisplay = `<span class="credit-amount">On vous doit ${totalCredit} DH</span>`;
+                            if (weekDebts.length > 0) {
+                                creditDebtDisplay += ` <small>(${weekDebts.length} achat${weekDebts.length > 1 ? 's' : ''})</small>`;
+                            }
+                        } else if (surplus === 0) {
                             status = '<span class="status-paid">✓ Payé</span>';
+                            if (totalDebts > 0) {
+                                creditDebtDisplay = `<span class="credit-amount">On vous doit ${totalDebts} DH</span>`;
+                                creditDebtDisplay += ` <small>(${weekDebts.length} achat${weekDebts.length > 1 ? 's' : ''})</small>`;
+                            } else {
+                                creditDebtDisplay = '<span class="no-debt">-</span>';
+                            }
                         } else {
-                            status = '<span class="status-unpaid">⚠ Insuffisant</span>';
-                        }
-                    } else {
-                        status = '<span class="status-unpaid">✗ Non payé</span>';
-                    }
+                             status = '<span class="status-unpaid">⚠ Insuffisant</span>';
+                             const totalOwed = Math.abs(surplus) + totalDebts;
+                             creditDebtDisplay = `<span class="debt-amount">Vous nous devez ${totalOwed} DH</span>`;
+                         }
+                     } else {
+                         status = '<span class="status-unpaid">✗ Non payé</span>';
+                         const totalOwed = weekData.weeklyAmount + totalDebts;
+                         creditDebtDisplay = `<span class="debt-amount">Vous nous devez ${totalOwed} DH</span>`;
+                     }
                     
-                    html += `<tr><td>${userName}</td><td>${status}</td></tr>`;
+                    html += `<tr><td>${userName}</td><td>${status}</td><td>${creditDebtDisplay}</td></tr>`;
                 });
                 
                 html += '</tbody></table></div>';
@@ -781,6 +906,62 @@ function handlePayment(e) {
     
     showAlert(message, 'success');
 }
+
+// Gestion de l'ajout de dettes
+function handleDebt(e) {
+    e.preventDefault();
+    
+    const userName = document.getElementById('debtUserName').value;
+    const debtAmount = parseFloat(document.getElementById('debtAmount').value);
+    const debtDescription = document.getElementById('debtDescription').value.trim();
+    
+    if (!userName || !debtAmount || debtAmount <= 0) {
+        showAlert('Veuillez remplir tous les champs obligatoires avec des valeurs valides.', 'error');
+        return;
+    }
+    
+    // Initialiser les dettes pour la semaine courante si nécessaire
+    if (!appData.debts[appData.currentWeek]) {
+        appData.debts[appData.currentWeek] = {};
+    }
+    
+    // Initialiser les dettes pour l'utilisateur si nécessaire
+    if (!appData.debts[appData.currentWeek][userName]) {
+        appData.debts[appData.currentWeek][userName] = [];
+    }
+    
+    // Créer l'objet dette
+    const debt = {
+        id: Date.now().toString(),
+        amount: debtAmount,
+        description: debtDescription || 'Achat imprévu',
+        date: new Date().toISOString(),
+        week: appData.currentWeek
+    };
+    
+    // Ajouter la dette
+    appData.debts[appData.currentWeek][userName].push(debt);
+    
+    // Envoyer au serveur si connecté
+    if (socket && isConnected) {
+        socket.emit('debt', {
+            data: debt,
+            userName: userName
+        });
+    }
+    
+    // Sauvegarder et mettre à jour l'affichage
+    saveData();
+    updateAllDisplays();
+    updatePublicStatusTable();
+    
+    // Réinitialiser le formulaire
+    document.getElementById('debtForm').reset();
+    
+    showAlert(`Dette de ${debtAmount} DH ajoutée avec succès pour ${userName} !`, 'success');
+}
+
+
 
 // Système d'alertes
 function showAlert(message, type = 'info') {
