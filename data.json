@@ -2,23 +2,7 @@
   "adminPassword": "admin123",
   "weeklyAmount": 100,
   "siteTitle": "Gestion Cotisation Étudiante",
-  "users": [
-    {
-      "id": "1758170614102",
-      "name": "HJGHKJ",
-      "createdAt": "2025-09-18T04:43:34.102Z"
-    },
-    {
-      "id": "1758170617033",
-      "name": "KLJKH",
-      "createdAt": "2025-09-18T04:43:37.033Z"
-    },
-    {
-      "id": "1758170620156",
-      "name": "IOU",
-      "createdAt": "2025-09-18T04:43:40.156Z"
-    }
-  ],
+  "users": [],
   "currentWeek": "2025-09-15",
   "payments": [
     {
@@ -196,7 +180,32 @@
     }
   },
   "history": {},
-  "groups": [],
+  "groups": [
+    {
+      "id": 1758202364689,
+      "name": "G1",
+      "task": "marche",
+      "members": [
+        "HJGHKJ"
+      ]
+    },
+    {
+      "id": 1758202381674,
+      "name": "G2",
+      "task": "poulet",
+      "members": [
+        "KLJKH"
+      ]
+    },
+    {
+      "id": 1758202392437,
+      "name": "G3",
+      "task": "repos",
+      "members": [
+        "IOU"
+      ]
+    }
+  ],
   "groupRotation": {
     "startWeek": null,
     "rotationOrder": [

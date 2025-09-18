@@ -462,7 +462,7 @@ function showAdminSection(sectionId) {
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    event.target.classList.add('active');
+    event?.target.classList.add('active');
     
     // Afficher la section correspondante
     document.querySelectorAll('.admin-section').forEach(section => {

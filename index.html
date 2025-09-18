@@ -434,7 +434,7 @@
                 <h3 id="groupModalTitle">Créer un Groupe</h3>
                 <span class="close" onclick="closeModal('groupModal')">&times;</span>
             </div>
-            <form id="groupForm">
+            <form id="groupForm" onsubmit="saveGroup(event)">
                 <input type="hidden" id="groupId">
                 <div class="form-group">
                     <label for="groupName">Nom du Groupe :</label>
