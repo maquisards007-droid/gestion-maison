@@ -55,7 +55,7 @@ L'application utilise un fichier `data.json` pour la persistance des données. L
 
 ## 📞 Support
 
-Pour toute question ou problème, contactez l'administrateur de la maison.
+Pour toute question ou problème, contactez l'administrateur de la maison. +212 776 005 280
 
 ---
 *Application développée pour simplifier la gestion quotidienne d'une maison étudiante* 🎓
