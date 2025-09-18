@@ -1,0 +1,12 @@
+{
+  "users": [],
+  "payments": [],
+  "groups": [],
+  "groupRotation": {
+    "startWeek": null,
+    "rotationOrder": ["marche", "poulet", "repos"]
+  },
+  "settings": {
+    "adminPassword": "admin123"
+  }
+}

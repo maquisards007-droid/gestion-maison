@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion Cotisation Étudiante</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Page de connexion administrateur -->
+    <div id="loginPage" class="page active">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <i class="fas fa-home"></i>
+                    <h1>Gestion Cotisation</h1>
+                    <p>Système de gestion des cotisations de colocation</p>
+                </div>
+                <div class="login-options">
+                    <button class="btn btn-primary" onclick="showAdminLogin()">
+                        <i class="fas fa-user-shield"></i>
+                        Espace Administrateur
+                    </button>
+                    <button class="btn btn-secondary" onclick="showPublicSpace()">
+                        <i class="fas fa-users"></i>
+                        Espace Colocataires
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de connexion administrateur -->
+    <div id="adminLoginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Connexion Administrateur</h2>
+                <span class="close" onclick="closeAdminLogin()">&times;</span>
+            </div>
+            <form id="adminLoginForm">
+                <div class="form-group">
+                    <label for="adminPassword">Mot de passe :</label>
+                    <input type="password" id="adminPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Se connecter</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Espace Administrateur -->
+    <div id="adminPage" class="page">
+        <header class="admin-header">
+            <div class="header-content">
+                <h1><i class="fas fa-cog"></i> Espace Administrateur</h1>
+                <button class="btn btn-logout" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Déconnexion
+                </button>
+            </div>
+        </header>
+
+        <div class="admin-container">
+            <nav class="admin-nav">
+                <button class="nav-btn active" onclick="showAdminSection('dashboard')">
+                    <i class="fas fa-tachometer-alt"></i> Tableau de Bord
+                </button>
+                <button class="nav-btn" onclick="showAdminSection('users')">
+                    <i class="fas fa-users"></i> Utilisateurs
+                </button>
+                <button class="nav-btn" onclick="showAdminSection('groups')">
+                    <i class="fas fa-users-cog"></i> Groupes
+                </button>
+                <button class="nav-btn" onclick="showAdminSection('settings')">
+                    <i class="fas fa-cog"></i> Paramètres
+                </button>
+                <button class="nav-btn" onclick="showAdminSection('history')">
+                    <i class="fas fa-history"></i> Historique
+                </button>
+                <button class="nav-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Déconnexion
+                </button>
+            </nav>
+
+            <main class="admin-content">
+                <!-- Tableau de bord -->
+                <section id="dashboard" class="admin-section active">
+                    <h2>Tableau de bord</h2>
+                    <div class="dashboard-stats">
+                        <div class="stat-card">
+                            <i class="fas fa-users"></i>
+                            <div class="stat-info">
+                                <h3 id="totalUsers">0</h3>
+                                <p>Colocataires</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <div class="stat-info">
+                                <h3 id="weeklyAmount">100 DH</h3>
+                                <p>Cotisation/semaine</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-check-circle"></i>
+                            <div class="stat-info">
+                                <h3 id="paidCount">0</h3>
+                                <p>Payé cette semaine</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <div class="stat-info">
+                                <h3 id="unpaidCount">0</h3>
+                                <p>En attente</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="current-week-status">
+                        <h3>Statut de la semaine actuelle</h3>
+                        <div id="weeklyStatusTable"></div>
+                    </div>
+                </section>
+
+                <!-- Gestion des utilisateurs -->
+                <section id="users" class="admin-section">
+                    <h2>Gestion des utilisateurs</h2>
+                    <div class="users-header">
+                        <button class="btn btn-primary" onclick="showAddUserModal()">
+                            <i class="fas fa-plus"></i> Ajouter un colocataire
+                        </button>
+                    </div>
+                    <div id="usersList" class="users-list"></div>
+                </section>
+
+                <!-- Paramètres -->
+                <section id="settings" class="admin-section">
+                    <h2>Paramètres</h2>
+                    <div class="settings-form">
+                        <div class="form-group">
+                            <label for="weeklyAmountInput">Montant de cotisation hebdomadaire (DH) :</label>
+                            <input type="number" id="weeklyAmountInput" min="1" value="100">
+                            <button class="btn btn-primary" onclick="updateWeeklyAmount()">Mettre à jour</button>
+                        </div>
+                        <div class="form-group">
+                            <label for="siteTitle">Titre du site :</label>
+                            <input type="text" id="siteTitle" value="Gestion Cotisation Étudiante">
+                            <button class="btn btn-primary" onclick="updateSiteTitle()">Mettre à jour</button>
+                        </div>
+                        <div class="form-group">
+                            <label for="newAdminPassword">Changer le mot de passe administrateur :</label>
+                            <input type="password" id="newAdminPassword" placeholder="Nouveau mot de passe">
+                            <button class="btn btn-primary" onclick="updateAdminPassword()">Changer</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Gestion des Groupes -->
+                <section id="groups" class="admin-section">
+                    <h2>Gestion des Groupes</h2>
+                    
+                    <div class="groups-controls">
+                        <button class="btn btn-primary" onclick="openGroupModal()">
+                            <i class="fas fa-plus"></i> Créer un Groupe
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetGroupRotation()">
+                            <i class="fas fa-sync-alt"></i> Réinitialiser Rotation
+                        </button>
+                    </div>
+
+                    <div class="current-week-info">
+                        <h3><i class="fas fa-calendar-week"></i> Semaine Actuelle</h3>
+                        <div class="week-rotation" id="currentWeekRotation">
+                            <!-- Rotation actuelle sera affichée ici -->
+                        </div>
+                    </div>
+
+                    <div class="groups-list">
+                        <h3><i class="fas fa-list"></i> Groupes Configurés</h3>
+                        <div id="groupsList">
+                            <!-- Liste des groupes sera affichée ici -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Historique -->
+                <section id="history" class="admin-section">
+                    <h2>Historique complet</h2>
+                    <div id="fullHistory"></div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Espace Public -->
+    <div id="publicPage" class="page">
+        <header class="public-header">
+            <div class="header-content">
+                <h1><i class="fas fa-home"></i> <span id="publicSiteTitle">Gestion Cotisation</span></h1>
+                <button class="btn btn-secondary" onclick="backToHome()">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </button>
+            </div>
+        </header>
+
+        <div class="public-container">
+            <div class="week-info">
+                <h2>Semaine du <span id="currentWeekDate"></span></h2>
+                <p class="weekly-amount">Cotisation : <span id="publicWeeklyAmount">100</span> DH</p>
+            </div>
+
+            <!-- Affichage des Tâches de Groupe -->
+            <div class="group-tasks-section">
+                <h2><i class="fas fa-tasks"></i> Tâches de la Semaine</h2>
+                <div class="group-tasks-grid" id="groupTasksGrid">
+                    <!-- Les tâches des groupes seront affichées ici -->
+                </div>
+            </div>
+
+            <div class="payment-section">
+                <h3>Valider votre paiement</h3>
+                <form id="paymentForm">
+                    <div class="form-group">
+                        <label for="userName">Votre nom :</label>
+                        <select id="userName" required>
+                            <option value="">Sélectionnez votre nom</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="paidAmount">Montant versé (DH) :</label>
+                        <input type="number" id="paidAmount" min="0" step="0.01" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check"></i> Valider le paiement
+                    </button>
+                </form>
+            </div>
+
+            <div class="status-overview">
+                <h3>Statut des paiements cette semaine</h3>
+                <div id="publicStatusTable"></div>
+            </div>
+
+            <div class="history-section">
+                <h3>Historique des 5 dernières semaines</h3>
+                <div id="publicHistory"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal d'ajout d'utilisateur -->
+    <div id="addUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Ajouter un colocataire</h2>
+                <span class="close" onclick="closeAddUserModal()">&times;</span>
+            </div>
+            <form id="addUserForm">
+                <div class="form-group">
+                    <label for="newUserName">Nom du colocataire :</label>
+                    <input type="text" id="newUserName" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Ajouter</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Modifier Utilisateur -->
+    <div id="editUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Modifier Utilisateur</h3>
+                <span class="close" onclick="closeModal('editUserModal')">&times;</span>
+            </div>
+            <form id="editUserForm">
+                <input type="hidden" id="editUserId">
+                <div class="form-group">
+                    <label for="editUserName">Nom :</label>
+                    <input type="text" id="editUserName" required>
+                </div>
+                <div class="form-group">
+                    <label for="editUserEmail">Email :</label>
+                    <input type="email" id="editUserEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="editUserPassword">Nouveau mot de passe (optionnel) :</label>
+                    <input type="password" id="editUserPassword">
+                </div>
+                <div class="form-group">
+                    <label for="editUserRole">Rôle :</label>
+                    <select id="editUserRole">
+                        <option value="user">Utilisateur</option>
+                        <option value="admin">Administrateur</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Modifier</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('editUserModal')">Annuler</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Gestion des Groupes -->
+    <div id="groupModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="groupModalTitle">Créer un Groupe</h3>
+                <span class="close" onclick="closeModal('groupModal')">&times;</span>
+            </div>
+            <form id="groupForm">
+                <input type="hidden" id="groupId">
+                <div class="form-group">
+                    <label for="groupName">Nom du Groupe :</label>
+                    <input type="text" id="groupName" required placeholder="Ex: Groupe 1">
+                </div>
+                <div class="form-group">
+                    <label for="groupTask">Tâche Assignée :</label>
+                    <select id="groupTask" required>
+                        <option value="">Sélectionner une tâche</option>
+                        <option value="marche">Faire le marché</option>
+                        <option value="poulet">Acheter le poulet</option>
+                        <option value="repos">Se reposer</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Membres du Groupe :</label>
+                    <div id="groupMembers" class="members-selection">
+                        <!-- Les utilisateurs disponibles seront affichés ici -->
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Sauvegarder</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('groupModal')">Annuler</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
