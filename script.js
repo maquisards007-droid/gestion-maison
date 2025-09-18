@@ -1189,6 +1189,12 @@ function displayGroupMembers() {
     
     container.innerHTML = '';
     
+    // Ajouter un compteur de membres sélectionnés
+    const counterDiv = document.createElement('div');
+    counterDiv.className = 'members-counter';
+    counterDiv.innerHTML = '<small>Membres sélectionnés: <span id="selectedCount">0</span></small>';
+    container.appendChild(counterDiv);
+    
     appData.users.forEach(user => {
         const userName = user.name || user;
         const isSelected = currentGroup ? currentGroup.members.includes(userName) : false;
@@ -1197,12 +1203,23 @@ function displayGroupMembers() {
         memberDiv.className = 'member-checkbox';
         memberDiv.innerHTML = `
             <label>
-                <input type="checkbox" value="${userName}" ${isSelected ? 'checked' : ''}>
+                <input type="checkbox" value="${userName}" ${isSelected ? 'checked' : ''} onchange="updateMemberCount()">
                 <span>${userName}</span>
             </label>
         `;
         container.appendChild(memberDiv);
     });
+    
+    // Mettre à jour le compteur initial
+    updateMemberCount();
+}
+
+function updateMemberCount() {
+    const checkedBoxes = document.querySelectorAll('#groupMembers input[type="checkbox"]:checked');
+    const countElement = document.getElementById('selectedCount');
+    if (countElement) {
+        countElement.textContent = checkedBoxes.length;
+    }
 }
 
 function saveGroup(event) {
@@ -1321,7 +1338,11 @@ function resetGroupRotation() {
 
 function displayCurrentWeekRotation() {
     const container = document.getElementById('currentWeekRotation');
-    const rotation = getCurrentTaskRotation();
+    
+    if (appData.groups.length === 0) {
+        container.innerHTML = '<p class="no-data">Aucun groupe configuré pour la rotation</p>';
+        return;
+    }
     
     const taskNames = {
         'marche': 'Faire le marché',
@@ -1329,11 +1350,24 @@ function displayCurrentWeekRotation() {
         'repos': 'Se reposer'
     };
     
+    // Calculer la rotation actuelle
+    const currentWeek = getCurrentWeekNumber();
+    const weeksSinceStart = currentWeek - appData.groupRotation.startWeek;
+    const rotationIndex = weeksSinceStart % 3;
+    
+    // Assigner les tâches rotatives aux groupes
+    const availableTasks = ['marche', 'poulet', 'repos'];
+    
     container.innerHTML = `
+        <div class="rotation-header">
+            <h3>Rotation Semaine ${currentWeek}</h3>
+            <p>Semaines depuis le début: ${weeksSinceStart}</p>
+        </div>
         <div class="rotation-grid">
-            ${Object.entries(rotation).map(([originalTask, currentTask]) => {
-                const group = appData.groups.find(g => g.task === originalTask);
-                if (!group) return '';
+            ${appData.groups.map((group, index) => {
+                // Calculer quelle tâche ce groupe doit faire cette semaine
+                const taskIndex = (index + rotationIndex) % availableTasks.length;
+                const currentTask = availableTasks[taskIndex];
                 
                 const memberNames = group.members.join(', ');
                 
@@ -1351,7 +1385,6 @@ function displayCurrentWeekRotation() {
 
 function displayGroupTasks() {
     const container = document.getElementById('groupTasksGrid');
-    const rotation = getCurrentTaskRotation();
     
     if (appData.groups.length === 0) {
         container.innerHTML = '<p class="no-data">Aucun groupe configuré</p>';
@@ -1370,9 +1403,18 @@ function displayGroupTasks() {
         'repos': 'fas fa-bed'
     };
     
-    container.innerHTML = Object.entries(rotation).map(([originalTask, currentTask]) => {
-        const group = appData.groups.find(g => g.task === originalTask);
-        if (!group) return '';
+    // Calculer la rotation actuelle
+    const currentWeek = getCurrentWeekNumber();
+    const weeksSinceStart = currentWeek - appData.groupRotation.startWeek;
+    const rotationIndex = weeksSinceStart % 3;
+    
+    // Assigner les tâches rotatives aux groupes
+    const availableTasks = ['marche', 'poulet', 'repos'];
+    
+    container.innerHTML = appData.groups.map((group, index) => {
+        // Calculer quelle tâche ce groupe doit faire cette semaine
+        const taskIndex = (index + rotationIndex) % availableTasks.length;
+        const currentTask = availableTasks[taskIndex];
         
         const memberNames = group.members.join(', ');
         
@@ -1384,7 +1426,8 @@ function displayGroupTasks() {
                 <div class="task-info">
                     <h3>${taskNames[currentTask]}</h3>
                     <h4>${group.name}</h4>
-                    <p>${memberNames}</p>
+                    <p class="group-members">${memberNames}</p>
+                    <small class="task-rotation">Rotation semaine ${currentWeek}</small>
                 </div>
             </div>
         `;

@@ -2184,28 +2184,73 @@ body {
     background: linear-gradient(145deg, #3a3a3a, #2e2e2e);
 }
 
-.member-checkbox {
+.members-selection {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #d4af37;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: rgba(42, 42, 42, 0.5);
+}
+
+.members-counter {
+    text-align: center;
     margin-bottom: 10px;
+    padding: 5px;
+    background-color: rgba(212, 175, 55, 0.1);
+    border-radius: 5px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.members-counter small {
+    color: #d4af37;
+    font-weight: 600;
+}
+
+.members-counter #selectedCount {
+    color: #fff;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.member-checkbox {
+    margin-bottom: 8px;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.member-checkbox:hover {
+    border-color: #d4af37;
+    background-color: rgba(212, 175, 55, 0.1);
 }
 
 .member-checkbox label {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     color: #f5f5f5;
     cursor: pointer;
-    padding: 8px;
+    padding: 10px;
     border-radius: 5px;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
+    margin: 0;
+    font-weight: 500;
 }
 
 .member-checkbox label:hover {
-    background-color: rgba(212, 175, 55, 0.1);
+    color: #d4af37;
 }
 
 .member-checkbox input[type="checkbox"] {
     accent-color: #d4af37;
-    transform: scale(1.2);
+    transform: scale(1.3);
+    cursor: pointer;
+}
+
+.member-checkbox input[type="checkbox"]:checked + span {
+    color: #d4af37;
+    font-weight: 600;
 }
 
 /* Styles pour l'affichage des tâches de groupe dans l'espace public */
