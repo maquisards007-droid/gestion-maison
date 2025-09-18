@@ -736,7 +736,18 @@ function handlePayment(e) {
         return;
     }
     
-    // Créer l'objet paiement
+    // Enregistrer le paiement localement dans tous les cas
+    if (!appData.payments[appData.currentWeek]) {
+        appData.payments[appData.currentWeek] = {};
+    }
+    
+    appData.payments[appData.currentWeek][userName] = {
+        amount: paidAmount,
+        date: new Date().toISOString(),
+        week: appData.currentWeek
+    };
+    
+    // Créer l'objet paiement pour le serveur
     const payment = {
         id: Date.now().toString(),
         userName: userName,
@@ -745,30 +756,18 @@ function handlePayment(e) {
         week: appData.currentWeek
     };
     
+    // Envoyer au serveur si connecté
     if (socket && isConnected) {
         socket.emit('paymentAdded', payment);
-    } else {
-        // Enregistrer le paiement
-        if (!appData.payments[appData.currentWeek]) {
-            appData.payments[appData.currentWeek] = {};
-        }
-        
-        appData.payments[appData.currentWeek][userName] = {
-            amount: paidAmount,
-            date: new Date().toISOString(),
-            week: appData.currentWeek
-        };
-        
-        updateAllDisplays();
     }
     
+    // Mettre à jour tous les affichages
+    updateAllDisplays();
+    updatePublicStatusTable();
+    updatePublicHistory();
     
     // Réinitialiser le formulaire
     document.getElementById('paymentForm').reset();
-    
-    // Mettre à jour l'affichage
-    updatePublicStatusTable();
-    updatePublicHistory();
     
     // Message de confirmation
     const diff = paidAmount - appData.weeklyAmount;
