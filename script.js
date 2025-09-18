@@ -34,6 +34,15 @@ document.addEventListener('DOMContentLoaded', function() {
     loadData(); // Charger les données sauvegardées avant l'initialisation
     initializeWebSocket();
     initializeApp();
+    
+    // Restaurer l'état de navigation après l'initialisation
+    setTimeout(() => {
+        const restored = restoreNavigationState();
+        if (!restored) {
+            // Si aucun état n'a été restauré, afficher la page d'accueil par défaut
+            showPage('homePage');
+        }
+    }, 100);
 });
 
 // Fonctions utilitaires pour les dates
@@ -295,6 +304,52 @@ function showPage(pageId) {
         page.classList.remove('active');
     });
     document.getElementById(pageId).classList.add('active');
+    
+    // Sauvegarder l'état de navigation
+    saveNavigationState(pageId);
+}
+
+// Sauvegarde de l'état de navigation
+function saveNavigationState(pageId, sectionId = null) {
+    const navigationState = {
+        currentPage: pageId,
+        currentSection: sectionId,
+        timestamp: Date.now()
+    };
+    localStorage.setItem('gestionMaison_navigationState', JSON.stringify(navigationState));
+}
+
+// Restauration de l'état de navigation
+function restoreNavigationState() {
+    try {
+        const savedState = localStorage.getItem('gestionMaison_navigationState');
+        if (savedState) {
+            const state = JSON.parse(savedState);
+            
+            // Vérifier que l'état n'est pas trop ancien (24h max)
+            const maxAge = 24 * 60 * 60 * 1000; // 24 heures
+            if (Date.now() - state.timestamp < maxAge) {
+                // Restaurer la page
+                if (state.currentPage && document.getElementById(state.currentPage)) {
+                    showPage(state.currentPage);
+                    
+                    // Si c'est la page admin et qu'il y a une section sauvegardée
+                    if (state.currentPage === 'adminPage' && state.currentSection) {
+                        // Petite temporisation pour s'assurer que la page est chargée
+                        setTimeout(() => {
+                            showAdminSection(state.currentSection);
+                        }, 100);
+                    }
+                    
+                    return true; // État restauré avec succès
+                }
+            }
+        }
+    } catch (error) {
+        console.log('Erreur lors de la restauration de l\'état de navigation:', error);
+    }
+    
+    return false; // Aucun état restauré
 }
 
 function showAdminLogin() {
@@ -316,7 +371,9 @@ function backToHome() {
 }
 
 function logout() {
-    showPage('loginPage');
+    // Effacer l'état de navigation sauvegardé lors de la déconnexion
+    localStorage.removeItem('gestionMaison_navigationState');
+    showPage('homePage');
 }
 
 // Authentification administrateur
@@ -336,6 +393,9 @@ function handleAdminLogin(e) {
 
 // Navigation dans l'espace administrateur
 function showAdminSection(sectionId) {
+    // Sauvegarder l'état de navigation avec la section
+    saveNavigationState('adminPage', sectionId);
+    
     // Mettre à jour les boutons de navigation
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.remove('active');

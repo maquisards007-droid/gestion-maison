@@ -227,6 +227,17 @@
             "note": "FDGF"
           }
         ]
+      },
+      "HJGHKJ": {
+        "paid": 1000,
+        "remaining": 500,
+        "payments": [
+          {
+            "amount": 1000,
+            "date": "2025-09-18",
+            "note": ""
+          }
+        ]
       }
     }
   },
