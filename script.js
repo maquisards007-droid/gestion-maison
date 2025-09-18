@@ -422,6 +422,15 @@ function closeAddUserModal() {
     document.getElementById('newUserName').value = '';
 }
 
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+    // Réinitialiser le formulaire si c'est le modal de groupe
+    if (modalId === 'groupModal') {
+        document.getElementById('groupForm').reset();
+        document.getElementById('groupId').value = '';
+    }
+}
+
 function handleAddUser(e) {
     e.preventDefault();
     const userName = document.getElementById('newUserName').value.trim();
