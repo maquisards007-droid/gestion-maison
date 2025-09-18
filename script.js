@@ -435,7 +435,13 @@ function handleAddUser(e) {
     e.preventDefault();
     const userName = document.getElementById('newUserName').value.trim();
     
-    if (userName && !appData.users.includes(userName)) {
+    // Vérifier si l'utilisateur existe déjà (compatible avec les objets et les chaînes)
+    const userExists = appData.users.some(user => {
+        const existingName = user.name || user;
+        return existingName === userName;
+    });
+    
+    if (userName && !userExists) {
         const newUser = {
             id: Date.now().toString(),
             name: userName,
@@ -458,12 +464,13 @@ function handleAddUser(e) {
 
 function removeUser(userName) {
     if (confirm(`Êtes-vous sûr de vouloir supprimer ${userName} ?`)) {
-        const user = appData.users.find(u => u.name === userName || u === userName);
-        const userId = user ? (user.id || user) : userName;
+        const user = appData.users.find(u => (u.name || u) === userName);
+        const userId = user ? (user.id || userName) : userName;
         
         if (socket && isConnected) {
             socket.emit('userDeleted', userId);
         } else {
+            // Supprimer l'utilisateur de la liste
             appData.users = appData.users.filter(user => (user.name || user) !== userName);
             
             // Supprimer les paiements de cet utilisateur
@@ -471,14 +478,18 @@ function removeUser(userName) {
                 delete appData.payments[week][userName];
             });
             
-            if (socket && isConnected) {
-                socket.emit('updateData', appData);
-            }
+            // Supprimer l'utilisateur de l'historique
+            Object.keys(appData.history).forEach(week => {
+                if (appData.history[week].payments) {
+                    delete appData.history[week].payments[userName];
+                }
+                if (appData.history[week].users) {
+                    appData.history[week].users = appData.history[week].users.filter(u => (u.name || u) !== userName);
+                }
+            });
+            
             updateAllDisplays();
         }
-        updateUsersList();
-        populateUserSelect();
-        updateAdminDashboard();
         showAlert(`${userName} a été supprimé`, 'success');
     }
 }
