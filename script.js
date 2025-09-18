@@ -516,7 +516,7 @@ function updateWeeklyStatusTable() {
     const currentWeekPayments = appData.payments[appData.currentWeek] || {};
     const currentWeekDebts = appData.debts[appData.currentWeek] || {};
     
-    let html = '<table class="table"><thead><tr><th>Colocataire</th><th>Statut</th><th>Montant</th><th>Surplus/Déficit</th><th>Crédit Final</th></tr></thead><tbody>';
+    let html = '<div class="table-wrapper"><table class="table"><thead><tr><th>Colocataire</th><th>Statut</th><th>Montant</th><th>Surplus/Déficit</th><th>Crédit Final</th></tr></thead><tbody>';
     
     appData.users.forEach(user => {
         const userName = user.name || user;
@@ -572,7 +572,7 @@ function updateWeeklyStatusTable() {
         html += `<tr><td>${userName}</td><td>${status}</td><td>${amount}</td><td>${surplus}</td><td>${finalCredit}</td></tr>`;
     });
     
-    html += '</tbody></table>';
+    html += '</tbody></table></div>';
     container.innerHTML = html;
 }
 
@@ -756,11 +756,12 @@ function updateFullHistory() {
                 <div class="history-week">
                     <h4>Semaine du ${getWeekDateRange(weekKey)}</h4>
                     <p><strong>Cotisation :</strong> ${weekData.weeklyAmount} DH</p>
-                    <table class="table">
-                        <thead>
-                            <tr><th>Colocataire</th><th>Montant payé</th><th>Statut</th></tr>
-                        </thead>
-                        <tbody>
+                    <div class="table-wrapper">
+                        <table class="table">
+                            <thead>
+                                <tr><th>Colocataire</th><th>Montant payé</th><th>Statut</th></tr>
+                            </thead>
+                            <tbody>
             `;
             
             weekData.users.forEach(user => {
@@ -786,7 +787,7 @@ function updateFullHistory() {
                 html += `<tr><td>${userName}</td><td>${amount}</td><td>${status}</td></tr>`;
             });
             
-            html += '</tbody></table></div>';
+            html += '</tbody></table></div></div>';
         });
     }
     
@@ -850,7 +851,7 @@ function updatePublicStatusTable() {
     const currentWeekPayments = appData.payments[appData.currentWeek] || {};
     const currentWeekDebts = appData.debts[appData.currentWeek] || {};
     
-    let html = '<table class="table"><thead><tr><th>Colocataire</th><th>Statut</th><th>Crédit/Dette</th></tr></thead><tbody>';
+    let html = '<div class="table-wrapper"><table class="table"><thead><tr><th>Colocataire</th><th>Statut</th><th>Crédit/Dette</th></tr></thead><tbody>';
     
     appData.users.forEach(user => {
         const userName = user.name || user;
@@ -908,7 +909,7 @@ function updatePublicStatusTable() {
         html += `<tr><td>${userName}</td><td>${status}</td><td>${creditDebtDisplay}</td></tr>`;
     });
     
-    html += '</tbody></table>';
+    html += '</tbody></table></div>';
     container.innerHTML = html;
 }
 
@@ -933,11 +934,12 @@ function updatePublicHistory() {
                 html += `
                     <div class="history-week">
                         <h4>Semaine du ${getWeekDateRange(weekKey)} ${isCurrentWeek ? '(Actuelle)' : ''}</h4>
-                        <table class="table">
-                            <thead>
-                                <tr><th>Colocataire</th><th>Statut</th><th>Crédit/Dette</th></tr>
-                            </thead>
-                            <tbody>
+                        <div class="table-wrapper">
+                            <table class="table">
+                                <thead>
+                                    <tr><th>Colocataire</th><th>Statut</th><th>Crédit/Dette</th></tr>
+                                </thead>
+                                <tbody>
                 `;
                 
                 weekData.users.forEach(user => {
@@ -980,7 +982,7 @@ function updatePublicHistory() {
                     html += `<tr><td>${userName}</td><td>${status}</td><td>${creditDebtDisplay}</td></tr>`;
                 });
                 
-                html += '</tbody></table></div>';
+                html += '</tbody></table></div></div>';
             }
         });
     }
@@ -1648,16 +1650,17 @@ function displayMonthlyDistribution(month, billData) {
 
     let html = `
         <h3><i class="fas fa-users"></i> Répartition par Colocataire</h3>
-        <table class="distribution-table">
-            <thead>
-                <tr>
-                    <th>Colocataire</th>
-                    <th>Part à payer</th>
-                    <th>Statut</th>
-                    <th class="payment-column">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
+        <div class="table-wrapper">
+            <table class="distribution-table">
+                <thead>
+                    <tr>
+                        <th>Colocataire</th>
+                        <th>Part à payer</th>
+                        <th>Statut</th>
+                        <th class="payment-column">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
     `;
 
     appData.users.forEach(user => {
@@ -1706,6 +1709,7 @@ function displayMonthlyDistribution(month, billData) {
     html += `
             </tbody>
         </table>
+        </div>
         <div style="margin-top: 20px; text-align: center;">
             <button class="btn btn-primary" onclick="exportMonthlyBill('${month}')">
                 <i class="fas fa-download"></i> Exporter la liste

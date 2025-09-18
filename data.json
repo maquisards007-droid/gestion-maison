@@ -2,7 +2,18 @@
   "adminPassword": "admin123",
   "weeklyAmount": 100,
   "siteTitle": "Gestion Cotisation Étudiante",
-  "users": [],
+  "users": [
+    {
+      "id": "1758204934610",
+      "name": "LIJ",
+      "createdAt": "2025-09-18T14:15:34.610Z"
+    },
+    {
+      "id": "1758204942508",
+      "name": "IUJH",
+      "createdAt": "2025-09-18T14:15:42.508Z"
+    }
+  ],
   "currentWeek": "2025-09-15",
   "payments": [
     {
