@@ -39,8 +39,8 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         const restored = restoreNavigationState();
         if (!restored) {
-            // Si aucun état n'a été restauré, afficher la page d'accueil par défaut
-            showPage('homePage');
+            // Si aucun état n'a été restauré, afficher la page de connexion par défaut
+            showPage('loginPage');
         }
     }, 100);
 });
@@ -300,13 +300,23 @@ function initializeApp() {
 
 // Gestion de l'affichage des pages
 function showPage(pageId) {
+    // Vérifier que l'élément existe avant de l'utiliser
+    const targetPage = document.getElementById(pageId);
+    if (!targetPage) {
+        console.warn(`Page avec l'ID "${pageId}" non trouvée. Redirection vers la page de connexion.`);
+        pageId = 'loginPage'; // Fallback vers la page de connexion
+    }
+    
     document.querySelectorAll('.page').forEach(page => {
         page.classList.remove('active');
     });
-    document.getElementById(pageId).classList.add('active');
     
-    // Sauvegarder l'état de navigation
-    saveNavigationState(pageId);
+    const pageToShow = document.getElementById(pageId);
+    if (pageToShow) {
+        pageToShow.classList.add('active');
+        // Sauvegarder l'état de navigation
+        saveNavigationState(pageId);
+    }
 }
 
 // Sauvegarde de l'état de navigation
@@ -373,7 +383,7 @@ function backToHome() {
 function logout() {
     // Effacer l'état de navigation sauvegardé lors de la déconnexion
     localStorage.removeItem('gestionMaison_navigationState');
-    showPage('homePage');
+    showPage('loginPage');
 }
 
 // Authentification administrateur
