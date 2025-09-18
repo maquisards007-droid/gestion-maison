@@ -386,6 +386,58 @@ function logout() {
     showPage('loginPage');
 }
 
+// Fonctions pour le menu mobile
+function toggleMobileMenu() {
+    const nav = document.getElementById('adminNav');
+    const overlay = document.querySelector('.nav-overlay');
+    
+    if (nav && overlay) {
+        const isOpen = nav.classList.contains('open');
+        
+        if (isOpen) {
+            closeMobileMenu();
+        } else {
+            openMobileMenu();
+        }
+    }
+}
+
+function openMobileMenu() {
+    const nav = document.getElementById('adminNav');
+    const overlay = document.querySelector('.nav-overlay');
+    
+    if (nav && overlay) {
+        nav.classList.add('open');
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Empêche le scroll du body
+    }
+}
+
+function closeMobileMenu() {
+    const nav = document.getElementById('adminNav');
+    const overlay = document.querySelector('.nav-overlay');
+    
+    if (nav && overlay) {
+        nav.classList.remove('open');
+        overlay.classList.remove('active');
+        document.body.style.overflow = ''; // Restaure le scroll du body
+    }
+}
+
+// Fermer le menu mobile lors du redimensionnement de la fenêtre
+window.addEventListener('resize', function() {
+    if (window.innerWidth > 768) {
+        closeMobileMenu();
+    }
+});
+
+// Fermer le menu mobile avec la touche Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeMobileMenu();
+    }
+});
+
 // Authentification administrateur
 function handleAdminLogin(e) {
     e.preventDefault();

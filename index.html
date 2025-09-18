@@ -52,7 +52,12 @@
     <div id="adminPage" class="page">
         <header class="admin-header">
             <div class="header-content">
-                <h1><i class="fas fa-cog"></i> Espace Administrateur</h1>
+                <div class="header-left">
+                    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="Menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1><i class="fas fa-cog"></i> Espace Administrateur</h1>
+                </div>
                 <button class="btn btn-logout" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i> Déconnexion
                 </button>
@@ -60,29 +65,44 @@
         </header>
 
         <div class="admin-container">
-            <nav class="admin-nav">
-                <button class="nav-btn active" onclick="showAdminSection('dashboard')">
-                    <i class="fas fa-tachometer-alt"></i> Tableau de Bord
+            <nav class="admin-nav" id="adminNav">
+                <div class="nav-header">
+                    <span class="nav-title">Navigation</span>
+                    <button class="nav-close" onclick="toggleMobileMenu()" aria-label="Fermer menu">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <button class="nav-btn active" onclick="showAdminSection('dashboard'); closeMobileMenu();">
+                    <i class="fas fa-tachometer-alt"></i> 
+                    <span>Tableau de Bord</span>
                 </button>
-                <button class="nav-btn" onclick="showAdminSection('users')">
-                    <i class="fas fa-users"></i> Utilisateurs
+                <button class="nav-btn" onclick="showAdminSection('users'); closeMobileMenu();">
+                    <i class="fas fa-users"></i> 
+                    <span>Utilisateurs</span>
                 </button>
-                <button class="nav-btn" onclick="showAdminSection('groups')">
-                    <i class="fas fa-users-cog"></i> Groupes
+                <button class="nav-btn" onclick="showAdminSection('groups'); closeMobileMenu();">
+                    <i class="fas fa-users-cog"></i> 
+                    <span>Groupes</span>
                 </button>
-                <button class="nav-btn" onclick="showAdminSection('monthly')">
-                    <i class="fas fa-file-invoice-dollar"></i> Gestion Mensuelle
+                <button class="nav-btn" onclick="showAdminSection('monthly'); closeMobileMenu();">
+                    <i class="fas fa-file-invoice-dollar"></i> 
+                    <span>Gestion Mensuelle</span>
                 </button>
-                <button class="nav-btn" onclick="showAdminSection('settings')">
-                    <i class="fas fa-cog"></i> Paramètres
+                <button class="nav-btn" onclick="showAdminSection('settings'); closeMobileMenu();">
+                    <i class="fas fa-cog"></i> 
+                    <span>Paramètres</span>
                 </button>
-                <button class="nav-btn" onclick="showAdminSection('history')">
-                    <i class="fas fa-history"></i> Historique
+                <button class="nav-btn" onclick="showAdminSection('history'); closeMobileMenu();">
+                    <i class="fas fa-history"></i> 
+                    <span>Historique</span>
                 </button>
-                <button class="nav-btn" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i> Déconnexion
+                <div class="nav-divider"></div>
+                <button class="nav-btn nav-logout" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> 
+                    <span>Déconnexion</span>
                 </button>
             </nav>
+            <div class="nav-overlay" onclick="closeMobileMenu()"></div>
 
             <main class="admin-content">
                 <!-- Tableau de bord -->
