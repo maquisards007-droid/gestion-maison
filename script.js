@@ -357,7 +357,8 @@ function updateWeeklyStatusTable() {
     let html = '<table class="table"><thead><tr><th>Colocataire</th><th>Statut</th><th>Montant</th><th>Surplus/Déficit</th></tr></thead><tbody>';
     
     appData.users.forEach(user => {
-        const payment = currentWeekPayments[user];
+        const userName = user.name || user;
+        const payment = currentWeekPayments[userName];
         let status, amount, surplus;
         
         if (payment) {
@@ -380,7 +381,7 @@ function updateWeeklyStatusTable() {
             surplus = `-${appData.weeklyAmount} DH`;
         }
         
-        html += `<tr><td>${user}</td><td>${status}</td><td>${amount}</td><td>${surplus}</td></tr>`;
+        html += `<tr><td>${userName}</td><td>${status}</td><td>${amount}</td><td>${surplus}</td></tr>`;
     });
     
     html += '</tbody></table>';
@@ -393,14 +394,15 @@ function updateUsersList() {
     let html = '';
     
     appData.users.forEach(user => {
+        const userName = user.name || user;
         html += `
             <div class="user-item">
                 <div class="user-info">
                     <i class="fas fa-user"></i>
-                    <span>${user}</span>
+                    <span>${userName}</span>
                 </div>
                 <div class="user-actions">
-                    <button class="btn btn-danger" onclick="removeUser('${user}')">
+                    <button class="btn btn-danger" onclick="removeUser('${userName}')">
                         <i class="fas fa-trash"></i> Supprimer
                     </button>
                 </div>
@@ -545,7 +547,8 @@ function updateFullHistory() {
             `;
             
             weekData.users.forEach(user => {
-                const payment = weekData.payments[user];
+                const userName = user.name || user;
+                const payment = weekData.payments[userName];
                 let amount, status;
                 
                 if (payment) {
@@ -563,7 +566,7 @@ function updateFullHistory() {
                     status = '<span class="status-unpaid">Non payé</span>';
                 }
                 
-                html += `<tr><td>${user}</td><td>${amount}</td><td>${status}</td></tr>`;
+                html += `<tr><td>${userName}</td><td>${amount}</td><td>${status}</td></tr>`;
             });
             
             html += '</tbody></table></div>';
@@ -600,9 +603,10 @@ function populateUserSelect() {
     select.innerHTML = '<option value="">Sélectionnez votre nom</option>';
     
     appData.users.forEach(user => {
+        const userName = user.name || user;
         const option = document.createElement('option');
-        option.value = user;
-        option.textContent = user;
+        option.value = userName;
+        option.textContent = userName;
         select.appendChild(option);
     });
 }
@@ -614,7 +618,8 @@ function updatePublicStatusTable() {
     let html = '<table class="table"><thead><tr><th>Colocataire</th><th>Statut</th></tr></thead><tbody>';
     
     appData.users.forEach(user => {
-        const payment = currentWeekPayments[user];
+        const userName = user.name || user;
+        const payment = currentWeekPayments[userName];
         let status;
         
         if (payment) {
@@ -630,7 +635,7 @@ function updatePublicStatusTable() {
             status = '<span class="status-unpaid">✗ Non payé</span>';
         }
         
-        html += `<tr><td>${user}</td><td>${status}</td></tr>`;
+        html += `<tr><td>${userName}</td><td>${status}</td></tr>`;
     });
     
     html += '</tbody></table>';
@@ -666,7 +671,8 @@ function updatePublicHistory() {
                 `;
                 
                 weekData.users.forEach(user => {
-                    const payment = weekData.payments[user];
+                    const userName = user.name || user;
+                    const payment = weekData.payments[userName];
                     let status;
                     
                     if (payment) {
@@ -682,7 +688,7 @@ function updatePublicHistory() {
                         status = '<span class="status-unpaid">✗ Non payé</span>';
                     }
                     
-                    html += `<tr><td>${user}</td><td>${status}</td></tr>`;
+                    html += `<tr><td>${userName}</td><td>${status}</td></tr>`;
                 });
                 
                 html += '</tbody></table></div>';
@@ -832,14 +838,15 @@ function displayGroupMembers() {
     container.innerHTML = '';
     
     appData.users.forEach(user => {
-        const isSelected = currentGroup ? currentGroup.members.includes(user) : false;
+        const userName = user.name || user;
+        const isSelected = currentGroup ? currentGroup.members.includes(userName) : false;
         
         const memberDiv = document.createElement('div');
         memberDiv.className = 'member-checkbox';
         memberDiv.innerHTML = `
             <label>
-                <input type="checkbox" value="${user}" ${isSelected ? 'checked' : ''}>
-                <span>${user}</span>
+                <input type="checkbox" value="${userName}" ${isSelected ? 'checked' : ''}>
+                <span>${userName}</span>
             </label>
         `;
         container.appendChild(memberDiv);
