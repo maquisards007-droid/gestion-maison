@@ -366,10 +366,11 @@ body {
 /* Conteneurs principaux */
 .admin-container {
     display: flex;
-    max-width: 1200px;
-    margin: 0 auto;
+    max-width: 100% !important;
+    margin: 0 !important;
     min-height: calc(100vh - 80px);
     padding-top: 80px;
+    width: 100% !important;
 }
 
 .public-container {
@@ -403,14 +404,23 @@ body {
 /* Navigation desktop */
 @media (min-width: 769px) {
     .admin-nav {
-        position: static;
-        left: auto;
-        height: auto;
-        transition: none;
+        position: fixed !important;
+        left: -250px !important;
+        height: 100vh !important;
+        transition: left 0.3s ease !important;
+        border-right: 2px solid #d4af37 !important;
+        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.3) !important;
+        width: 250px !important;
+        top: 0 !important;
+        z-index: 1002 !important;
+    }
+    
+    .admin-nav.open {
+        left: 0 !important;
     }
     
     .mobile-menu-toggle {
-        display: none !important;
+        display: block !important;
     }
     
     .nav-header {
@@ -485,8 +495,12 @@ body {
 /* Contenu admin */
 .admin-content {
     flex: 1;
-    padding: 30px;
+    padding: 30px 40px;
     background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+    margin-left: 0 !important; /* Pas de décalage sur desktop car sidebar cachée */
+    margin-right: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
 }
 
 .admin-section {
@@ -1904,15 +1918,20 @@ body {
      .history-week {
          margin-bottom: 20px;
          padding: 15px;
-         border: 1px solid #ddd;
-         border-radius: 8px;
-         background: white;
+         border: 2px solid #d4af37;
+         border-radius: 10px;
+         background: linear-gradient(145deg, #2a2a2a, #1e1e1e);
+         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), 0 0 10px rgba(212, 175, 55, 0.2);
      }
      
      .history-week h4 {
          margin-top: 0;
-         margin-bottom: 10px;
-         color: #333;
+         margin-bottom: 15px;
+         color: #d4af37;
+         padding-bottom: 10px;
+         border-bottom: 2px solid #d4af37;
+         font-weight: 600;
+         text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
      }
      
      /* Amélioration des sections mensuelles */

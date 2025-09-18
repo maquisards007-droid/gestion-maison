@@ -4,14 +4,14 @@
   "siteTitle": "Gestion Cotisation Étudiante",
   "users": [
     {
-      "id": "1758204934610",
-      "name": "LIJ",
-      "createdAt": "2025-09-18T14:15:34.610Z"
+      "id": "1758206591229",
+      "name": "YJHS",
+      "createdAt": "2025-09-18T14:43:11.229Z"
     },
     {
-      "id": "1758204942508",
-      "name": "IUJH",
-      "createdAt": "2025-09-18T14:15:42.508Z"
+      "id": "1758206595557",
+      "name": "UKDS",
+      "createdAt": "2025-09-18T14:43:15.557Z"
     }
   ],
   "currentWeek": "2025-09-15",
@@ -133,6 +133,13 @@
       "userName": "OPIU",
       "amount": 300,
       "date": "2025-09-18T03:54:42.726Z",
+      "week": "2025-09-15"
+    },
+    {
+      "id": "1758206448561",
+      "userName": "Ahmed",
+      "amount": 23,
+      "date": "2025-09-18T14:40:48.561Z",
       "week": "2025-09-15"
     }
   ],
