@@ -12,14 +12,20 @@
     "build": "echo 'No build step required'"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.18.2",
-    "socket.io": "^4.7.4",
-    "cors": "^2.8.5"
+    "node-cron": "^4.2.1",
+    "socket.io": "^4.7.4"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
   },
-  "keywords": ["websocket", "realtime", "gestion", "maison"],
+  "keywords": [
+    "websocket",
+    "realtime",
+    "gestion",
+    "maison"
+  ],
   "author": "Votre nom",
   "license": "MIT"
 }
