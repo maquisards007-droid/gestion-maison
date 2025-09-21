@@ -564,15 +564,29 @@ function updateWeeklyStatusTable() {
             } else {
                 status = '<span class="status-unpaid">Insuffisant</span>';
                 surplus = `${surplusAmount} DH`;
-                const totalOwed = Math.abs(surplusAmount) + totalDebts;
-                finalCredit = `<span class="debt-amount">Il nous doit ${totalOwed} DH</span>`;
+                // Calculer le solde final : déficit de cotisation - achats imprévus
+                const finalBalance = surplusAmount - totalDebts;
+                if (finalBalance > 0) {
+                    finalCredit = `<span class="credit-amount">On lui doit ${finalBalance} DH</span>`;
+                } else if (finalBalance < 0) {
+                    finalCredit = `<span class="debt-amount">Il nous doit ${Math.abs(finalBalance)} DH</span>`;
+                } else {
+                    finalCredit = '<span class="no-debt">Équilibré</span>';
+                }
             }
         } else {
             status = '<span class="status-unpaid">Non payé</span>';
             amount = '0 DH';
             surplus = `-${appData.weeklyAmount} DH`;
-            const totalOwed = appData.weeklyAmount + totalDebts;
-            finalCredit = `<span class="debt-amount">Il nous doit ${totalOwed} DH</span>`;
+            // Calculer le solde final : déficit de cotisation - achats imprévus
+            const finalBalance = -appData.weeklyAmount - totalDebts;
+            if (finalBalance > 0) {
+                finalCredit = `<span class="credit-amount">On lui doit ${finalBalance} DH</span>`;
+            } else if (finalBalance < 0) {
+                finalCredit = `<span class="debt-amount">Il nous doit ${Math.abs(finalBalance)} DH</span>`;
+            } else {
+                finalCredit = '<span class="no-debt">Équilibré</span>';
+            }
         }
         
         html += `<tr><td>${userName}</td><td>${status}</td><td>${amount}</td><td>${surplus}</td><td>${finalCredit}</td></tr>`;
@@ -902,14 +916,24 @@ function updatePublicStatusTable() {
             } else {
                 // Paiement insuffisant
                 status = '<span class="status-unpaid">⚠ Insuffisant</span>';
-                const totalOwed = Math.abs(surplus) + totalDebts;
-                creditDebtDisplay = `<span class="debt-amount">Vous nous devez ${totalOwed} DH</span>`;
+                // surplus est négatif, donc on calcule : déficit - achats imprévus
+                const finalBalance = surplus - totalDebts; // surplus négatif - dettes = balance finale
+                if (finalBalance < 0) {
+                    creditDebtDisplay = `<span class="debt-amount">Vous nous devez ${Math.abs(finalBalance)} DH</span>`;
+                } else {
+                    creditDebtDisplay = `<span class="credit-amount">On vous doit ${finalBalance} DH</span>`;
+                }
             }
         } else {
             // Pas de paiement
             status = '<span class="status-unpaid">✗ Non payé</span>';
-            const totalOwed = appData.weeklyAmount + totalDebts;
-            creditDebtDisplay = `<span class="debt-amount">Vous nous devez ${totalOwed} DH</span>`;
+            // Déficit de cotisation - achats imprévus = balance finale
+            const finalBalance = -appData.weeklyAmount - totalDebts;
+            if (finalBalance < 0) {
+                creditDebtDisplay = `<span class="debt-amount">Vous nous devez ${Math.abs(finalBalance)} DH</span>`;
+            } else {
+                creditDebtDisplay = `<span class="credit-amount">On vous doit ${finalBalance} DH</span>`;
+            }
         }
         
         html += `<tr><td>${userName}</td><td>${status}</td><td>${creditDebtDisplay}</td></tr>`;
@@ -976,13 +1000,27 @@ function updatePublicHistory() {
                             }
                         } else {
                              status = '<span class="status-unpaid">⚠ Insuffisant</span>';
-                             const totalOwed = Math.abs(surplus) + totalDebts;
-                             creditDebtDisplay = `<span class="debt-amount">Vous nous devez ${totalOwed} DH</span>`;
+                             // Calculer le solde final : déficit de cotisation - achats imprévus
+                             const finalBalance = surplus - totalDebts;
+                             if (finalBalance > 0) {
+                                 creditDebtDisplay = `<span class="credit-amount">On vous doit ${finalBalance} DH</span>`;
+                             } else if (finalBalance < 0) {
+                                 creditDebtDisplay = `<span class="debt-amount">Vous nous devez ${Math.abs(finalBalance)} DH</span>`;
+                             } else {
+                                 creditDebtDisplay = '<span class="no-debt">Équilibré</span>';
+                             }
                          }
                      } else {
                          status = '<span class="status-unpaid">✗ Non payé</span>';
-                         const totalOwed = weekData.weeklyAmount + totalDebts;
-                         creditDebtDisplay = `<span class="debt-amount">Vous nous devez ${totalOwed} DH</span>`;
+                         // Calculer le solde final : déficit de cotisation - achats imprévus
+                         const finalBalance = -weekData.weeklyAmount - totalDebts;
+                         if (finalBalance > 0) {
+                             creditDebtDisplay = `<span class="credit-amount">On vous doit ${finalBalance} DH</span>`;
+                         } else if (finalBalance < 0) {
+                             creditDebtDisplay = `<span class="debt-amount">Vous nous devez ${Math.abs(finalBalance)} DH</span>`;
+                         } else {
+                             creditDebtDisplay = '<span class="no-debt">Équilibré</span>';
+                         }
                      }
                     
                     html += `<tr><td>${userName}</td><td>${status}</td><td>${creditDebtDisplay}</td></tr>`;
