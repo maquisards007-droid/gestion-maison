@@ -1,327 +1,331 @@
 {
-  "adminPassword": "admin123",
-  "weeklyAmount": 100,
-  "siteTitle": "Gestion Cotisation Étudiante",
-  "users": [
-    {
-      "id": "1758206591229",
-      "name": "YJHS",
-      "createdAt": "2025-09-18T14:43:11.229Z"
-    },
-    {
-      "id": "1758206595557",
-      "name": "UKDS",
-      "createdAt": "2025-09-18T14:43:15.557Z"
-    }
-  ],
-  "currentWeek": "2025-09-22",
-  "payments": [
-    {
-      "id": "1758162021788",
-      "userName": "GHFG",
-      "amount": 100,
-      "date": "2025-09-18T02:20:21.788Z",
-      "week": "2025-09-15"
-    },
-    {
-      "id": "1758162035168",
-      "userName": "GHFG",
-      "amount": 90,
-      "date": "2025-09-18T02:20:35.168Z",
-      "week": "2025-09-15"
-    },
-    {
-      "id": "1758162045490",
-      "userName": "GHFG",
-      "amount": 200,
-      "date": "2025-09-18T02:20:45.490Z",
-      "week": "2025-09-15"
-    },
-    {
-      "id": "1758162942160",
-      "userName": "FRE",
-      "amount": 100,
-      "date": "2025-09-18T02:35:42.160Z",
-      "week": "2025-09-15"
-    },
-    {
-      "id": "1758164476234",
-      "userName": "GHFG",
-      "amount": 100,
-      "date": "2025-09-18T03:01:16.234Z",
-      "week": "2025-09-15"
-    },
-    {
-      "id": "1758164489909",
-      "userName": "FRE",
-      "amount": 90,
-      "date": "2025-09-18T03:01:29.909Z",
-      "week": "2025-09-15"
-    },
-    {
-      "id": "1758164505632",
-      "userName": "FRE",
-      "amount": 1010,
-      "date": "2025-09-18T03:01:45.632Z",
-      "week": "2025-09-15"
-    },
-    {
-      "id": "1758165048246",
-      "userName": "ESRDF",
-      "amount": 100,
-      "date": "2025-09-18T03:10:48.246Z",
-      "week": "2025-09-15"
-    },
-    {
-      "id": "1758165053760",
-      "userName": "FRE",
-      "amount": 200,
-      "date": "2025-09-18T03:10:53.760Z",
-      "week": "2025-09-15"
-    },
-    {
-      "id": "1758165084895",
-      "userName": "GHFG",
-      "amount": 100,
-      "date": "2025-09-18T03:11:24.895Z",
-      "week": "2025-09-15"
-    },
-    {
-      "id": "1758165803559",
-      "userName": "GHFG",
-      "amount": 300,
-      "date": "2025-09-18T03:23:23.559Z",
-      "week": "2025-09-15"
-    },
-    {
-      "id": "1758165844467",
-      "userName": "GHFG",
-      "amount": 100,
-      "date": "2025-09-18T03:24:04.467Z",
-      "week": "2025-09-15"
-    },
-    {
-      "id": "1758165877942",
-      "userName": "GHFG",
-      "amount": 100,
-      "date": "2025-09-18T03:24:37.942Z",
-      "week": "2025-09-15"
-    },
-    {
-      "id": "1758167128292",
-      "userName": "UY",
-      "amount": 200,
-      "date": "2025-09-18T03:45:28.292Z",
-      "week": "2025-09-15"
-    },
-    {
-      "id": "1758167214202",
-      "userName": "UY",
-      "amount": 100,
-      "date": "2025-09-18T03:46:54.202Z",
-      "week": "2025-09-15"
-    },
-    {
-      "id": "1758167666410",
-      "userName": "UIYG",
-      "amount": 100,
-      "date": "2025-09-18T03:54:26.410Z",
-      "week": "2025-09-15"
-    },
-    {
-      "id": "1758167682726",
-      "userName": "OPIU",
-      "amount": 300,
-      "date": "2025-09-18T03:54:42.726Z",
-      "week": "2025-09-15"
-    },
-    {
-      "id": "1758206448561",
-      "userName": "Ahmed",
-      "amount": 23,
-      "date": "2025-09-18T14:40:48.561Z",
-      "week": "2025-09-15"
-    },
-    {
-      "id": "1758470257382",
-      "userName": "YJHS",
-      "amount": 100,
-      "date": "2025-09-21T15:57:37.382Z",
-      "week": "2025-09-22"
-    },
-    {
-      "id": "1758470288219",
-      "userName": "UKDS",
-      "amount": 200,
-      "date": "2025-09-21T15:58:08.219Z",
-      "week": "2025-09-22"
-    },
-    {
-      "id": "1758470334789",
-      "userName": "UKDS",
-      "amount": 90,
-      "date": "2025-09-21T15:58:54.789Z",
-      "week": "2025-09-22"
-    }
-  ],
-  "debts": {
-    "2025-09-15": {
-      "Youssef": [
-        {
-          "id": "1758162970076",
-          "amount": 10,
-          "description": "HJ",
-          "date": "2025-09-18T02:36:10.076Z",
-          "week": "2025-09-15"
-        }
-      ],
-      "GHFG": [
-        {
-          "id": "1758165113647",
-          "amount": 12,
-          "description": "5TRG",
-          "date": "2025-09-18T03:11:53.647Z",
-          "week": "2025-09-15"
-        }
-      ],
-      "FRE": [
-        {
-          "id": "1758165133855",
-          "amount": 20,
-          "description": "4RF",
-          "date": "2025-09-18T03:12:13.855Z",
-          "week": "2025-09-15"
-        },
-        {
-          "id": "1758165168111",
-          "amount": 20,
-          "description": "GDF",
-          "date": "2025-09-18T03:12:48.111Z",
-          "week": "2025-09-15"
-        }
-      ],
-      "UY": [
-        {
-          "id": "1758167169236",
-          "amount": 20,
-          "description": "yu",
-          "date": "2025-09-18T03:46:09.236Z",
-          "week": "2025-09-15"
-        },
-        {
-          "id": "1758167193021",
-          "amount": 10,
-          "description": "10",
-          "date": "2025-09-18T03:46:33.021Z",
-          "week": "2025-09-15"
-        }
-      ]
-    },
-    "2025-09-22": {
-      "YJHS": [
-        {
-          "id": "1758470271483",
-          "amount": 39,
-          "description": "Achat imprévu",
-          "date": "2025-09-21T15:57:51.483Z",
-          "week": "2025-09-22"
-        }
-      ],
-      "UKDS": [
-        {
-          "id": "1758470316646",
-          "amount": 10,
-          "description": "Achat imprévu",
-          "date": "2025-09-21T15:58:36.646Z",
-          "week": "2025-09-22"
-        }
-      ]
-    }
-  },
-  "history": {},
-  "groups": [
-    {
-      "id": 1758202364689,
-      "name": "G1",
-      "task": "marche",
-      "members": [
-        "HJGHKJ"
-      ]
-    },
-    {
-      "id": 1758202381674,
-      "name": "G2",
-      "task": "poulet",
-      "members": [
-        "KLJKH"
-      ]
-    },
-    {
-      "id": 1758202392437,
-      "name": "G3",
-      "task": "repos",
-      "members": [
-        "IOU"
-      ]
-    },
-    {
-      "id": 1758219517736,
-      "name": "G1z",
-      "task": "poulet",
-      "members": [
-        "YJHS",
-        "UKDS"
-      ]
-    }
-  ],
-  "groupRotation": {
-    "startWeek": null,
-    "rotationOrder": [
-      "marche",
-      "poulet",
-      "repos"
-    ]
-  },
-  "monthlyBills": {
-    "2025-09": {
-      "loyer": 4500,
-      "electricite": 0,
-      "eau": 0,
-      "gaz": 0,
-      "imprevus": 0,
-      "autres": []
-    }
-  },
-  "monthlyPayments": {
-    "2025-09": {
-      "[object Object]": {
-        "paid": 12,
-        "remaining": 1488,
-        "payments": [
-          {
-            "amount": 12,
-            "date": "2025-09-18",
-            "note": "FDGF"
-          }
-        ]
-      },
-      "HJGHKJ": {
-        "paid": 1000,
-        "remaining": 500,
-        "payments": [
-          {
-            "amount": 1000,
-            "date": "2025-09-18",
-            "note": ""
-          }
-        ]
-      }
-    }
-  },
-  "monthlySettings": {
-    "loyerDefaut": 4500
-  },
-  "settings": {
-    "adminPassword": "admin123"
-  }
+    "adminPassword":  "admin123",
+    "weeklyAmount":  100,
+    "siteTitle":  "Gestion Cotisation Étudiante",
+    "users":  [
+                  {
+                      "id":  "1758206591229",
+                      "name":  "YJHS",
+                      "createdAt":  "2025-09-18T14:43:11.229Z"
+                  },
+                  {
+                      "id":  "1758206595557",
+                      "name":  "UKDS",
+                      "createdAt":  "2025-09-18T14:43:15.557Z"
+                  }
+              ],
+    "currentWeek":  "2025-09-22",
+    "payments":  [
+                     {
+                         "id":  "1758162021788",
+                         "userName":  "GHFG",
+                         "amount":  100,
+                         "date":  "2025-09-18T02:20:21.788Z",
+                         "week":  "2025-09-15"
+                     },
+                     {
+                         "id":  "1758162035168",
+                         "userName":  "GHFG",
+                         "amount":  90,
+                         "date":  "2025-09-18T02:20:35.168Z",
+                         "week":  "2025-09-15"
+                     },
+                     {
+                         "id":  "1758162045490",
+                         "userName":  "GHFG",
+                         "amount":  200,
+                         "date":  "2025-09-18T02:20:45.490Z",
+                         "week":  "2025-09-15"
+                     },
+                     {
+                         "id":  "1758162942160",
+                         "userName":  "FRE",
+                         "amount":  100,
+                         "date":  "2025-09-18T02:35:42.160Z",
+                         "week":  "2025-09-15"
+                     },
+                     {
+                         "id":  "1758164476234",
+                         "userName":  "GHFG",
+                         "amount":  100,
+                         "date":  "2025-09-18T03:01:16.234Z",
+                         "week":  "2025-09-15"
+                     },
+                     {
+                         "id":  "1758164489909",
+                         "userName":  "FRE",
+                         "amount":  90,
+                         "date":  "2025-09-18T03:01:29.909Z",
+                         "week":  "2025-09-15"
+                     },
+                     {
+                         "id":  "1758164505632",
+                         "userName":  "FRE",
+                         "amount":  1010,
+                         "date":  "2025-09-18T03:01:45.632Z",
+                         "week":  "2025-09-15"
+                     },
+                     {
+                         "id":  "1758165048246",
+                         "userName":  "ESRDF",
+                         "amount":  100,
+                         "date":  "2025-09-18T03:10:48.246Z",
+                         "week":  "2025-09-15"
+                     },
+                     {
+                         "id":  "1758165053760",
+                         "userName":  "FRE",
+                         "amount":  200,
+                         "date":  "2025-09-18T03:10:53.760Z",
+                         "week":  "2025-09-15"
+                     },
+                     {
+                         "id":  "1758165084895",
+                         "userName":  "GHFG",
+                         "amount":  100,
+                         "date":  "2025-09-18T03:11:24.895Z",
+                         "week":  "2025-09-15"
+                     },
+                     {
+                         "id":  "1758165803559",
+                         "userName":  "GHFG",
+                         "amount":  300,
+                         "date":  "2025-09-18T03:23:23.559Z",
+                         "week":  "2025-09-15"
+                     },
+                     {
+                         "id":  "1758165844467",
+                         "userName":  "GHFG",
+                         "amount":  100,
+                         "date":  "2025-09-18T03:24:04.467Z",
+                         "week":  "2025-09-15"
+                     },
+                     {
+                         "id":  "1758165877942",
+                         "userName":  "GHFG",
+                         "amount":  100,
+                         "date":  "2025-09-18T03:24:37.942Z",
+                         "week":  "2025-09-15"
+                     },
+                     {
+                         "id":  "1758167128292",
+                         "userName":  "UY",
+                         "amount":  200,
+                         "date":  "2025-09-18T03:45:28.292Z",
+                         "week":  "2025-09-15"
+                     },
+                     {
+                         "id":  "1758167214202",
+                         "userName":  "UY",
+                         "amount":  100,
+                         "date":  "2025-09-18T03:46:54.202Z",
+                         "week":  "2025-09-15"
+                     },
+                     {
+                         "id":  "1758167666410",
+                         "userName":  "UIYG",
+                         "amount":  100,
+                         "date":  "2025-09-18T03:54:26.410Z",
+                         "week":  "2025-09-15"
+                     },
+                     {
+                         "id":  "1758167682726",
+                         "userName":  "OPIU",
+                         "amount":  300,
+                         "date":  "2025-09-18T03:54:42.726Z",
+                         "week":  "2025-09-15"
+                     },
+                     {
+                         "id":  "1758206448561",
+                         "userName":  "Ahmed",
+                         "amount":  23,
+                         "date":  "2025-09-18T14:40:48.561Z",
+                         "week":  "2025-09-15"
+                     },
+                     {
+                         "id":  "1758470257382",
+                         "userName":  "YJHS",
+                         "amount":  100,
+                         "date":  "2025-09-21T15:57:37.382Z",
+                         "week":  "2025-09-22"
+                     },
+                     {
+                         "id":  "1758470288219",
+                         "userName":  "UKDS",
+                         "amount":  200,
+                         "date":  "2025-09-21T15:58:08.219Z",
+                         "week":  "2025-09-22"
+                     },
+                     {
+                         "id":  "1758470334789",
+                         "userName":  "UKDS",
+                         "amount":  90,
+                         "date":  "2025-09-21T15:58:54.789Z",
+                         "week":  "2025-09-22"
+                     }
+                 ],
+    "debts":  {
+                  "2025-09-15":  {
+                                     "Youssef":  [
+                                                     {
+                                                         "id":  "1758162970076",
+                                                         "amount":  10,
+                                                         "description":  "HJ",
+                                                         "date":  "2025-09-18T02:36:10.076Z",
+                                                         "week":  "2025-09-15"
+                                                     }
+                                                 ],
+                                     "GHFG":  [
+                                                  {
+                                                      "id":  "1758165113647",
+                                                      "amount":  12,
+                                                      "description":  "5TRG",
+                                                      "date":  "2025-09-18T03:11:53.647Z",
+                                                      "week":  "2025-09-15"
+                                                  }
+                                              ],
+                                     "FRE":  [
+                                                 {
+                                                     "id":  "1758165133855",
+                                                     "amount":  20,
+                                                     "description":  "4RF",
+                                                     "date":  "2025-09-18T03:12:13.855Z",
+                                                     "week":  "2025-09-15"
+                                                 },
+                                                 {
+                                                     "id":  "1758165168111",
+                                                     "amount":  20,
+                                                     "description":  "GDF",
+                                                     "date":  "2025-09-18T03:12:48.111Z",
+                                                     "week":  "2025-09-15"
+                                                 }
+                                             ],
+                                     "UY":  [
+                                                {
+                                                    "id":  "1758167169236",
+                                                    "amount":  20,
+                                                    "description":  "yu",
+                                                    "date":  "2025-09-18T03:46:09.236Z",
+                                                    "week":  "2025-09-15"
+                                                },
+                                                {
+                                                    "id":  "1758167193021",
+                                                    "amount":  10,
+                                                    "description":  "10",
+                                                    "date":  "2025-09-18T03:46:33.021Z",
+                                                    "week":  "2025-09-15"
+                                                }
+                                            ]
+                                 },
+                  "2025-09-22":  {
+                                     "YJHS":  [
+                                                  {
+                                                      "id":  "1758470271483",
+                                                      "amount":  39,
+                                                      "description":  "Achat imprévu",
+                                                      "date":  "2025-09-21T15:57:51.483Z",
+                                                      "week":  "2025-09-22"
+                                                  }
+                                              ],
+                                     "UKDS":  [
+                                                  {
+                                                      "id":  "1758470316646",
+                                                      "amount":  10,
+                                                      "description":  "Achat imprévu",
+                                                      "date":  "2025-09-21T15:58:36.646Z",
+                                                      "week":  "2025-09-22"
+                                                  }
+                                              ]
+                                 }
+              },
+    "history":  {
+
+                },
+    "groups":  [
+                   {
+                       "id":  1758202364689,
+                       "name":  "G1",
+                       "task":  "marche",
+                       "members":  [
+                                       "HJGHKJ"
+                                   ]
+                   },
+                   {
+                       "id":  1758202381674,
+                       "name":  "G2",
+                       "task":  "poulet",
+                       "members":  [
+                                       "KLJKH"
+                                   ]
+                   },
+                   {
+                       "id":  1758202392437,
+                       "name":  "G3",
+                       "task":  "repos",
+                       "members":  [
+                                       "IOU"
+                                   ]
+                   },
+                   {
+                       "id":  1758219517736,
+                       "name":  "G1z",
+                       "task":  "poulet",
+                       "members":  [
+                                       "YJHS",
+                                       "UKDS"
+                                   ]
+                   }
+               ],
+    "groupRotation":  {
+                          "startWeek":  null,
+                          "rotationOrder":  [
+                                                "marche",
+                                                "poulet",
+                                                "repos"
+                                            ]
+                      },
+    "monthlyBills":  {
+                         "2025-09":  {
+                                         "loyer":  4500,
+                                         "electricite":  0,
+                                         "eau":  0,
+                                         "gaz":  0,
+                                         "imprevus":  0,
+                                         "autres":  [
+
+                                                    ]
+                                     }
+                     },
+    "monthlyPayments":  {
+                            "2025-09":  {
+                                            "HJGHKJ":  {
+                                                           "paid":  1000,
+                                                           "remaining":  500,
+                                                           "payments":  [
+                                                                            {
+                                                                                "amount":  1000,
+                                                                                "date":  "2025-09-18",
+                                                                                "note":  ""
+                                                                            }
+                                                                        ]
+                                                       },
+                                            "Utilisateur_Inconnu":  {
+                                                                        "paid":  12,
+                                                                        "remaining":  1488,
+                                                                        "payments":  [
+                                                                                         {
+                                                                                             "amount":  12,
+                                                                                             "date":  "2025-09-18",
+                                                                                             "note":  "FDGF"
+                                                                                         }
+                                                                                     ]
+                                                                    }
+                                        }
+                        },
+    "monthlySettings":  {
+                            "loyerDefaut":  4500
+                        },
+    "settings":  {
+                     "adminPassword":  "admin123"
+                 }
 }

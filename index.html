@@ -182,22 +182,47 @@
                         <button class="btn btn-primary" onclick="openGroupModal()">
                             <i class="fas fa-plus"></i> Créer un Groupe
                         </button>
-                        <button class="btn btn-secondary" onclick="resetGroupRotation()">
+                        <button class="btn btn-secondary" onclick="openRotationConfigModal()">
+                            <i class="fas fa-cog"></i> Configurer Rotation
+                        </button>
+                        <button class="btn btn-warning" onclick="resetGroupRotation()">
                             <i class="fas fa-sync-alt"></i> Réinitialiser Rotation
                         </button>
                     </div>
-
-                    <div class="current-week-info">
-                        <h3><i class="fas fa-calendar-week"></i> Semaine Actuelle</h3>
+                
+                    <!-- Configuration de la rotation -->
+                    <div class="rotation-config">
+                        <h3><i class="fas fa-sync-alt"></i> Configuration de la Rotation</h3>
+                        <div class="rotation-info">
+                            <div class="rotation-status">
+                                <p><strong>Semaine de démarrage :</strong> <span id="rotationStartWeek">Non définie</span></p>
+                                <p><strong>Semaine actuelle :</strong> <span id="currentWeekNumber">-</span></p>
+                                <p><strong>Cycle de rotation :</strong> <span id="rotationCycle">Marché → Poulet → Repos</span></p>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <!-- Rotation actuelle -->
+                    <div class="week-rotation">
+                        <h3><i class="fas fa-calendar-week"></i> Rotation de cette semaine</h3>
                         <div class="week-rotation" id="currentWeekRotation">
                             <!-- Rotation actuelle sera affichée ici -->
                         </div>
                     </div>
-
+                
+                    <!-- Liste des groupes -->
                     <div class="groups-list">
                         <h3><i class="fas fa-list"></i> Groupes Configurés</h3>
                         <div id="groupsList">
                             <!-- Liste des groupes sera affichée ici -->
+                        </div>
+                    </div>
+                
+                    <!-- Historique des rotations -->
+                    <div class="rotation-history">
+                        <h3><i class="fas fa-history"></i> Historique des Rotations</h3>
+                        <div class="rotation-timeline" id="rotationTimeline">
+                            <!-- Historique sera affiché ici -->
                         </div>
                     </div>
                 </section>
@@ -438,22 +463,75 @@
                     <input type="text" id="groupName" required placeholder="Ex: Groupe 1">
                 </div>
                 <div class="form-group">
-                    <label for="groupTask">Tâche Assignée :</label>
-                    <select id="groupTask" required>
-                        <option value="">Sélectionner une tâche</option>
-                        <option value="marche">Faire le marché</option>
-                        <option value="poulet">Acheter le poulet</option>
-                        <option value="repos">Se reposer</option>
-                    </select>
-                </div>
-                <div class="form-group">
                     <label>Membres du Groupe (sélectionnez un ou plusieurs membres) :</label>
                     <div id="groupMembers" class="members-selection">
-                        <!-- Les utilisateurs disponibles seront affichés ici -->
+                        <!-- Les membres seront affichés ici -->
+                    </div>
+                    <p class="member-count">Membres sélectionnés: <span id="memberCount">0</span></p>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">Sauvegarder</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('groupModal')">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Configuration de la Rotation -->
+    <div id="rotationConfigModal" class="modal">
+        <div class="modal-content">
+            <h3>Configuration de la Rotation des Groupes</h3>
+            <span class="close" onclick="closeModal('rotationConfigModal')">&times;</span>
+            <form id="rotationConfigForm" onsubmit="saveRotationConfig(event)">
+                <div class="form-group">
+                    <label for="rotationStartWeek">Semaine de démarrage :</label>
+                    <input type="number" id="rotationStartWeek" required min="1" max="53" 
+                           placeholder="Ex: 38 (pour la semaine 38)">
+                    <small>Numéro de la semaine où commence la rotation (1-53)</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>Ordre de rotation des tâches :</label>
+                    <div class="rotation-order">
+                        <div class="task-order-item">
+                            <span class="task-number">1.</span>
+                            <select id="task1" required>
+                                <option value="marche">Faire le marché</option>
+                                <option value="poulet">Acheter le poulet</option>
+                                <option value="repos">Se reposer</option>
+                            </select>
+                        </div>
+                        <div class="task-order-item">
+                            <span class="task-number">2.</span>
+                            <select id="task2" required>
+                                <option value="poulet">Acheter le poulet</option>
+                                <option value="marche">Faire le marché</option>
+                                <option value="repos">Se reposer</option>
+                            </select>
+                        </div>
+                        <div class="task-order-item">
+                            <span class="task-number">3.</span>
+                            <select id="task3" required>
+                                <option value="repos">Se reposer</option>
+                                <option value="marche">Faire le marché</option>
+                                <option value="poulet">Acheter le poulet</option>
+                            </select>
+                        </div>
+                    </div>
+                    <small>Définissez l'ordre dans lequel les tâches se succèdent chaque semaine</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Aperçu de la rotation :</label>
+                    <div id="rotationPreview" class="rotation-preview">
+                        <!-- Aperçu sera généré automatiquement -->
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Sauvegarder</button>
-                <button type="button" class="btn btn-secondary" onclick="closeModal('groupModal')">Annuler</button>
+
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">Sauvegarder Configuration</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('rotationConfigModal')">Annuler</button>
+                </div>
             </form>
         </div>
     </div>
