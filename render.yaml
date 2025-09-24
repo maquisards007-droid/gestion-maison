@@ -12,10 +12,15 @@ services:
         value: 10000
       - key: HOST
         value: 0.0.0.0
+      - key: SUPABASE_URL
+        sync: false
+        # URL de votre projet Supabase (ex: https://xxxxx.supabase.co)
+      - key: SUPABASE_ANON_KEY
+        sync: false
+        # Clé anonyme de votre projet Supabase
       - key: MONGODB_URI
         sync: false
-        # Cette variable sera configurée dans le dashboard Render
-        # avec une vraie URI MongoDB Atlas
+        # URI MongoDB Atlas (fallback si Supabase indisponible)
     healthCheckPath: /
     autoDeploy: true
     branch: master

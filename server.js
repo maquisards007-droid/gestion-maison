@@ -4,7 +4,7 @@ const socketIo = require('socket.io');
 const cors = require('cors');
 const path = require('path');
 const cron = require('node-cron');
-const database = require('./database');
+const database = require('./supabase');
 
 const app = express();
 const server = http.createServer(app);

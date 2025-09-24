@@ -31,8 +31,9 @@ npm start
 
 - **Backend**: Node.js, Express.js, Socket.io
 - **Frontend**: HTML5, CSS3, JavaScript (Vanilla)
-- **Stockage**: JSON file-based
+- **Base de données**: Supabase (PostgreSQL) avec fallback local
 - **Temps réel**: WebSocket avec Socket.io
+- **Déploiement**: Render.com
 
 ## 📱 Utilisation
 
@@ -48,10 +49,30 @@ npm start
 
 ## 🔧 Configuration
 
-L'application utilise un fichier `data.json` pour la persistance des données. Les paramètres par défaut incluent :
+### Base de Données
+L'application utilise **Supabase** (PostgreSQL) pour la persistance avec un système de fallback local automatique.
+
+**Variables d'environnement requises :**
+```env
+SUPABASE_URL=https://votre-projet.supabase.co
+SUPABASE_ANON_KEY=votre-cle-anon
+```
+
+### Paramètres par défaut
 - Montant hebdomadaire : 100€
 - Mot de passe admin : admin123 (à changer)
 - Rotation des tâches : marché → poulet → repos
+
+### Fonctionnalités avancées
+- ✅ **Sauvegardes automatiques** toutes les 5 minutes
+- ✅ **Interface d'administration** Supabase
+- ✅ **Fallback local** en cas de problème réseau
+- ✅ **500 MB de stockage gratuit**
+
+## 📚 Documentation
+
+- 📖 **[Guide de configuration Supabase](./SUPABASE_SETUP.md)**
+- 🚀 **[Guide de déploiement](./DEPLOYMENT.md)**
 
 ## 📞 Support
 
