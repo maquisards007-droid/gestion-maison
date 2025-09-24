@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: gestion-maison
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: HOST
+        value: 0.0.0.0
+      - key: MONGODB_URI
+        sync: false
+        # Cette variable sera configurée dans le dashboard Render
+        # avec une vraie URI MongoDB Atlas
+    healthCheckPath: /
+    autoDeploy: true
+    branch: master

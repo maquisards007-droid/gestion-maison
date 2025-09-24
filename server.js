@@ -2,9 +2,9 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
-const fs = require('fs').promises;
 const path = require('path');
 const cron = require('node-cron');
+const database = require('./database');
 
 const app = express();
 const server = http.createServer(app);
@@ -20,7 +20,6 @@ const io = socketIo(server, {
 
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || '0.0.0.0';
-const DATA_FILE = path.join(__dirname, 'data.json');
 
 // Middleware
 app.use(cors());
@@ -51,25 +50,33 @@ const defaultData = {
   }
 };
 
-// Charger les données depuis le fichier JSON
+// Charger les données depuis MongoDB
 async function loadData() {
   try {
-    const data = await fs.readFile(DATA_FILE, 'utf8');
-    return JSON.parse(data);
+    const data = await database.loadAppData();
+    if (data) {
+      console.log('✅ Données chargées depuis MongoDB');
+      return data;
+    } else {
+      console.log('📄 Aucune donnée trouvée, création avec données par défaut');
+      await saveData(defaultData);
+      return defaultData;
+    }
   } catch (error) {
-    console.log('Fichier de données non trouvé, création avec données par défaut');
-    await saveData(defaultData);
+    console.error('❌ Erreur lors du chargement depuis MongoDB:', error);
+    console.log('🔄 Utilisation des données par défaut');
     return defaultData;
   }
 }
 
-// Sauvegarder les données dans le fichier JSON
+// Sauvegarder les données dans MongoDB
 async function saveData(data) {
   try {
-    await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
+    await database.saveAppData(data);
+    console.log('💾 Données sauvegardées dans MongoDB');
     return true;
   } catch (error) {
-    console.error('Erreur lors de la sauvegarde:', error);
+    console.error('❌ Erreur lors de la sauvegarde dans MongoDB:', error);
     return false;
   }
 }
@@ -155,22 +162,42 @@ async function archiveWeeklyData() {
 }
 
 // Initialiser les données au démarrage
-loadData().then(data => {
-  appData = data;
-  console.log('Données chargées avec succès');
-  
-  // Configurer le cron job pour l'archivage automatique
-  // Chaque samedi à 23h59 (59 23 * * 6)
-  cron.schedule('59 23 * * 6', () => {
-    console.log('🕐 Déclenchement de l\'archivage automatique hebdomadaire...');
-    archiveWeeklyData();
-  }, {
-    scheduled: true,
-    timezone: "Europe/Paris"
-  });
-  
-  console.log('⏰ Planificateur d\'archivage automatique configuré (chaque samedi à 23h59)');
-});
+async function initializeApp() {
+  try {
+    // Connecter à MongoDB
+    await database.connect();
+    
+    // Charger les données
+    const data = await loadData();
+    appData = data;
+    console.log('✅ Application initialisée avec succès');
+    
+    // Configurer le cron job pour l'archivage automatique
+    // Chaque samedi à 23h59 (59 23 * * 6)
+    cron.schedule('59 23 * * 6', () => {
+      console.log('🕐 Déclenchement de l\'archivage automatique hebdomadaire...');
+      archiveWeeklyData();
+    }, {
+      scheduled: true,
+      timezone: "Europe/Paris"
+    });
+    
+    // Sauvegarde automatique toutes les 5 minutes
+    cron.schedule('*/5 * * * *', async () => {
+      try {
+        await database.createBackup(appData);
+      } catch (error) {
+        console.error('❌ Erreur lors de la sauvegarde automatique:', error);
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Erreur lors de l\'initialisation:', error);
+    process.exit(1);
+  }
+}
+
+initializeApp();
 
 // Routes API
 app.get('/api/data', async (req, res) => {
@@ -321,4 +348,43 @@ io.on('connection', (socket) => {
 server.listen(PORT, HOST, () => {
   console.log(`🚀 Serveur démarré sur http://${HOST}:${PORT}`);
   console.log('📡 WebSocket prêt pour la synchronisation temps réel');
+});
+
+// Gestion propre de la fermeture de l'application
+process.on('SIGINT', async () => {
+  console.log('\n🔄 Arrêt du serveur en cours...');
+  
+  try {
+    // Sauvegarder les données une dernière fois
+    await saveData(appData);
+    console.log('💾 Données sauvegardées avant fermeture');
+    
+    // Déconnecter de MongoDB
+    await database.disconnect();
+    
+    // Fermer le serveur
+    server.close(() => {
+      console.log('✅ Serveur fermé proprement');
+      process.exit(0);
+    });
+  } catch (error) {
+    console.error('❌ Erreur lors de la fermeture:', error);
+    process.exit(1);
+  }
+});
+
+process.on('SIGTERM', async () => {
+  console.log('\n🔄 Signal SIGTERM reçu, arrêt du serveur...');
+  
+  try {
+    await saveData(appData);
+    await database.disconnect();
+    server.close(() => {
+      console.log('✅ Serveur fermé proprement');
+      process.exit(0);
+    });
+  } catch (error) {
+    console.error('❌ Erreur lors de la fermeture:', error);
+    process.exit(1);
+  }
 });
