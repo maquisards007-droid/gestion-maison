@@ -1130,6 +1130,9 @@ function handlePayment(e) {
         socket.emit('paymentAdded', payment);
     }
     
+    // Sauvegarder les données après le paiement
+    saveData();
+    
     // Mettre à jour tous les affichages
     updateAllDisplays();
     updatePublicStatusTable();

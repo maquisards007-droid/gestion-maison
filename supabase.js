@@ -120,15 +120,15 @@ class SupabaseDatabase {
 
       if (error) {
         if (error.code === 'PGRST116') {
-          // Aucune donnée trouvée, retourner structure par défaut
-          console.log('ℹ️ Aucune donnée trouvée, initialisation...');
-          return { users: [], payments: [], debts: [] };
+          // Aucune donnée trouvée, retourner null pour que server.js utilise defaultData
+          console.log('ℹ️ Aucune donnée trouvée dans Supabase');
+          return null;
         }
         throw error;
       }
 
       console.log('📖 Données chargées depuis Supabase');
-      return data.data || { users: [], payments: [], debts: [] };
+      return data.data || null;
     } catch (error) {
       console.error('❌ Erreur lors du chargement Supabase:', error.message);
       console.log('🔄 Basculement vers le fichier local');
