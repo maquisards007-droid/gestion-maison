@@ -206,9 +206,13 @@ async function archiveWeeklyData() {
     
     console.log(`🗄️ [${formatDate(now)}] Début de l'archivage automatique hebdomadaire`);
     
+    // Filtrer les paiements de la semaine actuelle
+    const currentWeekPayments = appData.payments ? appData.payments.filter(payment => payment.week === currentWeek) : [];
+    const currentWeekDebts = appData.debts ? appData.debts.filter(debt => debt.week === currentWeek) : [];
+    
     // Vérifier s'il y a des données à archiver pour la semaine actuelle
-    if (!appData.payments || !appData.payments[currentWeek]) {
-      console.log(`📝 [${formatDate(now)}] Aucune donnée de paiement à archiver pour la semaine ${currentWeek}`);
+    if (currentWeekPayments.length === 0 && currentWeekDebts.length === 0) {
+      console.log(`📝 [${formatDate(now)}] Aucune donnée à archiver pour la semaine ${currentWeek}`);
       return;
     }
     
@@ -220,8 +224,8 @@ async function archiveWeeklyData() {
     // Archiver les données de la semaine actuelle
     const weekData = {
       week: currentWeek,
-      payments: appData.payments[currentWeek] || {},
-      debts: appData.debts[currentWeek] || {},
+      payments: currentWeekPayments,
+      debts: currentWeekDebts,
       weeklyAmount: appData.weeklyAmount || 100,
       users: [...appData.users], // Copie des utilisateurs à ce moment
       archivedAt: now.toISOString(),
@@ -232,16 +236,18 @@ async function archiveWeeklyData() {
     appData.history[currentWeek] = weekData;
     
     // Nettoyer les données de la semaine actuelle (optionnel)
-    // Vous pouvez commenter ces lignes si vous voulez garder les données actuelles
-    // delete appData.payments[currentWeek];
-    // delete appData.debts[currentWeek];
+    // Supprimer les paiements et dettes de la semaine archivée
+    appData.payments = appData.payments.filter(payment => payment.week !== currentWeek);
+    if (appData.debts && Array.isArray(appData.debts)) {
+      appData.debts = appData.debts.filter(debt => debt.week !== currentWeek);
+    }
     
     // Sauvegarder les données mises à jour
     const saved = await saveData(appData);
     
     if (saved) {
       console.log(`✅ [${formatDate(now)}] Archivage automatique réussi pour la semaine ${currentWeek}`);
-      console.log(`📊 [${formatDate(now)}] Données archivées: ${Object.keys(weekData.payments).length} paiements, ${Object.keys(weekData.debts).length} dettes`);
+      console.log(`📊 [${formatDate(now)}] Données archivées: ${currentWeekPayments.length} paiements, ${currentWeekDebts.length} dettes`);
       
       // Notifier tous les clients connectés de l'archivage
       io.emit('weeklyArchived', {
@@ -271,13 +277,14 @@ async function initializeApp() {
     
     // Configurer le cron job pour l'archivage automatique
     // Chaque samedi à 23h59 (59 23 * * 6)
-    cron.schedule('10 23 * * 5', () => {
+    cron.schedule('59 23 * * 6', () => {
       console.log('🕐 Déclenchement de l\'archivage automatique hebdomadaire...');
       archiveWeeklyData();
     }, {
       scheduled: true,
       timezone: "Europe/Paris"
     });
+    console.log('⏰ Cron job d\'archivage automatique configuré (samedi 23h59, heure de Paris)');
     
     // Sauvegarde automatique toutes les 5 minutes
     cron.schedule('*/5 * * * *', async () => {
