@@ -38,7 +38,7 @@ app.use(express.static(__dirname, {
 // Structure de données par défaut
 const defaultData = {
   users: [],
-  payments: [],
+  payments: {}, // Objet organisé par semaine au lieu d'un tableau
   debts: {},
   groups: [],
   groupRotation: {
@@ -291,7 +291,21 @@ io.on('connection', (socket) => {
   });
 
   socket.on('paymentAdded', async (payment) => {
-    appData.payments.push(payment);
+    // Initialiser la structure des paiements si nécessaire
+    if (!appData.payments) {
+      appData.payments = {};
+    }
+    
+    // Initialiser la semaine si nécessaire
+    if (!appData.payments[payment.week]) {
+      appData.payments[payment.week] = {};
+    }
+    
+    // Ajouter le paiement avec l'ID comme clé
+    appData.payments[payment.week][payment.id] = payment;
+    
+    console.log(`💰 Paiement ajouté: ${payment.userName} - ${payment.amount}€ (semaine ${payment.week})`);
+    
     await saveData(appData);
     io.emit('paymentAdded', payment);
   });
