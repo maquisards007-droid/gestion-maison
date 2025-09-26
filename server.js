@@ -37,46 +37,143 @@ app.use(express.static(__dirname, {
 
 // Structure de données par défaut
 const defaultData = {
-  users: [],
+  adminPassword: 'admin123',
+  weeklyAmount: 100,
+  siteTitle: 'Gestion Cotisation Étudiante',
+  users: ['Ahmed', 'Fatima', 'Youssef', 'Aicha'],
+  currentWeek: getCurrentWeekKey(),
   payments: {}, // Objet organisé par semaine au lieu d'un tableau
   debts: {},
+  history: {},
   groups: [],
   groupRotation: {
     startWeek: null,
     rotationOrder: ['marche', 'poulet', 'repos']
+  },
+  monthlyBills: {},
+  monthlyPayments: {},
+  monthlySettings: {
+    loyerDefaut: 4500
   },
   settings: {
     adminPassword: 'admin123'
   }
 };
 
-// Charger les données depuis MongoDB
+// Fonction pour obtenir la clé de la semaine actuelle
+function getCurrentWeekKey() {
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay() + 1); // Lundi
+  return startOfWeek.toISOString().split('T')[0];
+}
+
+// Charger les données depuis Supabase
 async function loadData() {
   try {
     const data = await database.loadAppData();
     if (data) {
-      console.log('✅ Données chargées depuis MongoDB');
-      return data;
+      console.log('✅ Données chargées depuis Supabase');
+      
+      // Migration automatique de l'ancienne structure vers la nouvelle
+      const migratedData = migrateDataStructure(data);
+      
+      // Si les données ont été migrées, les sauvegarder
+      if (migratedData !== data) {
+        console.log('🔄 Migration de la structure des données détectée');
+        await saveData(migratedData);
+      }
+      
+      return migratedData;
     } else {
       console.log('📄 Aucune donnée trouvée, création avec données par défaut');
       await saveData(defaultData);
       return defaultData;
     }
   } catch (error) {
-    console.error('❌ Erreur lors du chargement depuis MongoDB:', error);
+    console.error('❌ Erreur lors du chargement depuis Supabase:', error);
     console.log('🔄 Utilisation des données par défaut');
     return defaultData;
   }
 }
 
-// Sauvegarder les données dans MongoDB
+// Fonction de migration des données
+function migrateDataStructure(data) {
+  let migrated = { ...data };
+  let needsMigration = false;
+  
+  // Migration des paiements : tableau vers objet par semaine
+  if (Array.isArray(migrated.payments)) {
+    console.log('🔄 Migration des paiements: tableau → objet par semaine');
+    const newPayments = {};
+    
+    migrated.payments.forEach(payment => {
+      if (payment.week) {
+        if (!newPayments[payment.week]) {
+          newPayments[payment.week] = {};
+        }
+        newPayments[payment.week][payment.id] = payment;
+      }
+    });
+    
+    migrated.payments = newPayments;
+    needsMigration = true;
+  }
+  
+  // Migration des utilisateurs : tableau de strings vers objets
+  if (migrated.users && migrated.users.length > 0 && typeof migrated.users[0] === 'string') {
+    console.log('🔄 Migration des utilisateurs: strings → objets');
+    migrated.users = migrated.users.map((userName, index) => ({
+      id: `migrated_${Date.now()}_${index}`,
+      name: userName,
+      createdAt: new Date().toISOString()
+    }));
+    needsMigration = true;
+  }
+  
+  // Assurer la présence de toutes les propriétés nécessaires
+  const requiredProps = {
+    adminPassword: 'admin123',
+    weeklyAmount: 100,
+    siteTitle: 'Gestion Cotisation Étudiante',
+    currentWeek: getCurrentWeekKey(),
+    payments: {},
+    debts: {},
+    history: {},
+    groups: [],
+    groupRotation: {
+      startWeek: null,
+      rotationOrder: ['marche', 'poulet', 'repos']
+    },
+    monthlyBills: {},
+    monthlyPayments: {},
+    monthlySettings: {
+      loyerDefaut: 4500
+    }
+  };
+  
+  for (const [key, defaultValue] of Object.entries(requiredProps)) {
+    if (!(key in migrated)) {
+      migrated[key] = defaultValue;
+      needsMigration = true;
+    }
+  }
+  
+  if (needsMigration) {
+    console.log('✅ Migration des données terminée');
+  }
+  
+  return migrated;
+}
+
+// Sauvegarder les données dans Supabase
 async function saveData(data) {
   try {
     await database.saveAppData(data);
-    console.log('💾 Données sauvegardées dans MongoDB');
+    console.log('💾 Données sauvegardées dans Supabase');
     return true;
   } catch (error) {
-    console.error('❌ Erreur lors de la sauvegarde dans MongoDB:', error);
+    console.error('❌ Erreur lors de la sauvegarde dans Supabase:', error);
     return false;
   }
 }
@@ -164,7 +261,7 @@ async function archiveWeeklyData() {
 // Initialiser les données au démarrage
 async function initializeApp() {
   try {
-    // Connecter à MongoDB
+    // Connecter à Supabase
     await database.connect();
     
     // Charger les données
@@ -379,7 +476,7 @@ process.on('SIGINT', async () => {
     await saveData(appData);
     console.log('💾 Données sauvegardées avant fermeture');
     
-    // Déconnecter de MongoDB
+    // Déconnecter de Supabase
     await database.disconnect();
     
     // Fermer le serveur
