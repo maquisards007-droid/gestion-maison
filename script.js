@@ -165,15 +165,34 @@ function initializeWebSocket() {
     });
     
     socket.on('paymentAdded', (payment) => {
-        if (!appData.payments.find(p => p.id === payment.id)) {
-            appData.payments.push(payment);
+        console.log('💰 Paiement reçu:', payment);
+        
+        // Initialiser la structure pour la semaine si nécessaire
+        if (!appData.payments[payment.week]) {
+            appData.payments[payment.week] = {};
+        }
+        
+        // Vérifier si le paiement n'existe pas déjà
+        const existingPayment = appData.payments[payment.week][payment.userName];
+        if (!existingPayment || existingPayment.date !== payment.date) {
+            // Ajouter/mettre à jour le paiement
+            appData.payments[payment.week][payment.userName] = {
+                amount: payment.amount,
+                date: payment.date,
+                week: payment.week
+            };
+            
+            // Sauvegarder localement
+            localStorage.setItem('appData', JSON.stringify(appData));
+            
             updateAllDisplays();
-            showAlert(`Paiement de ${payment.userName} enregistré`, 'success');
+            showAlert(`Paiement de ${payment.userName} synchronisé`, 'success');
         }
     });
 
     socket.on('debtAdded', (data) => {
         const { debt, userName } = data;
+        console.log('💳 Dette reçue:', debt, 'pour', userName);
         
         // Initialiser les dettes pour la semaine si nécessaire
         if (!appData.debts[debt.week]) {
@@ -189,8 +208,12 @@ function initializeWebSocket() {
         const existingDebt = appData.debts[debt.week][userName].find(d => d.id === debt.id);
         if (!existingDebt) {
             appData.debts[debt.week][userName].push(debt);
+            
+            // Sauvegarder localement
+            localStorage.setItem('appData', JSON.stringify(appData));
+            
             updateAllDisplays();
-            showAlert(`Dette de ${userName} enregistrée: ${debt.amount}€`, 'success');
+            showAlert(`Dette de ${userName} synchronisée: ${debt.amount}€`, 'success');
         }
     });
 
