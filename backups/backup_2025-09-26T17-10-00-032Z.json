@@ -1,0 +1,127 @@
+{
+  "adminPassword": "admin123",
+  "weeklyAmount": 100,
+  "siteTitle": "Gestion Cotisation Étudiante",
+  "users": [
+    {
+      "id": "1758713471081",
+      "name": "CISSOKO",
+      "createdAt": "2025-09-24T11:31:11.081Z"
+    },
+    {
+      "id": "1758718995132",
+      "name": "SIDIBE",
+      "createdAt": "2025-09-24T13:03:15.132Z"
+    },
+    {
+      "id": "1758719001798",
+      "name": "ZANGA",
+      "createdAt": "2025-09-24T13:03:21.798Z"
+    },
+    {
+      "id": "1758719038053",
+      "name": "ISMAEL",
+      "createdAt": "2025-09-24T13:03:58.053Z"
+    },
+    {
+      "id": "1758719049706",
+      "name": "PETANKY",
+      "createdAt": "2025-09-24T13:04:09.706Z"
+    },
+    {
+      "id": "1758719057920",
+      "name": "ZAKARIA",
+      "createdAt": "2025-09-24T13:04:17.920Z"
+    }
+  ],
+  "currentWeek": "2025-09-22",
+  "payments": [
+    {
+      "id": "1758847057548",
+      "userName": "CISSOKO",
+      "amount": 100,
+      "date": "2025-09-26T00:37:37.548Z",
+      "week": "2025-09-22"
+    }
+  ],
+  "debts": [],
+  "history": {},
+  "groups": [
+    {
+      "id": 1758846901369,
+      "name": "G1",
+      "members": [
+        "CISSOKO",
+        "SIDIBE"
+      ]
+    },
+    {
+      "id": 1758846940964,
+      "name": "G2",
+      "members": [
+        "PETANKY",
+        "ZAKARIA"
+      ]
+    },
+    {
+      "id": 1758846967580,
+      "name": "G3",
+      "members": [
+        "ZANGA",
+        "ISMAEL"
+      ]
+    }
+  ],
+  "groupRotation": {
+    "startWeek": 39,
+    "rotationOrder": [
+      "marche",
+      "poulet",
+      "repos"
+    ]
+  },
+  "monthlyBills": {
+    "2025-09": {
+      "loyer": 4500,
+      "electricite": 20,
+      "eau": 15,
+      "gaz": 100,
+      "imprevus": 1000,
+      "autres": [
+        {
+          "nom": "INTERNET",
+          "montant": 20
+        }
+      ]
+    }
+  },
+  "monthlyPayments": {
+    "2025-09": {
+      "CISSOKO": {
+        "paid": 900,
+        "remaining": 42.5,
+        "payments": [
+          {
+            "amount": 900,
+            "date": "2025-09-26",
+            "note": ""
+          }
+        ]
+      },
+      "SIDIBE": {
+        "paid": 0,
+        "remaining": 942.5,
+        "payments": []
+      },
+      "ZANGA": {
+        "paid": 0,
+        "remaining": 942.5,
+        "payments": []
+      }
+    },
+    "": {}
+  },
+  "monthlySettings": {
+    "loyerDefaut": 4500
+  }
+}
