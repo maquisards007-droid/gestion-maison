@@ -248,6 +248,12 @@ io.on('connection', (socket) => {
   // Envoyer les données actuelles au nouveau client
   socket.emit('initialData', appData);
 
+  // Gestionnaire pour demande explicite de données
+  socket.on('requestData', () => {
+    console.log('Données demandées par le client:', socket.id);
+    socket.emit('initialData', appData);
+  });
+
   // Écouter les mises à jour de données
   socket.on('updateData', async (newData) => {
     appData = newData;

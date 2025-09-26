@@ -105,6 +105,9 @@ function initializeWebSocket() {
         console.log('✅ Connecté au serveur WebSocket');
         isConnected = true;
         showAlert('Connexion établie - Synchronisation temps réel active', 'success');
+        
+        // Demander explicitement les données au serveur
+        socket.emit('requestData');
     });
     
     socket.on('disconnect', () => {
@@ -114,10 +117,21 @@ function initializeWebSocket() {
     });
     
     socket.on('initialData', (data) => {
-        console.log('📥 Données initiales reçues');
-        appData = { ...appData, ...data };
-        appData.currentWeek = getCurrentWeekKey();
+        console.log('📥 Données initiales reçues du serveur');
+        console.log('Données reçues:', data);
+        
+        // Fusionner les données du serveur avec les données locales
+        appData = { 
+            ...appData, 
+            ...data,
+            currentWeek: getCurrentWeekKey() // Toujours utiliser la semaine actuelle
+        };
+        
+        // Sauvegarder en local pour le cache
+        localStorage.setItem('cotisationApp', JSON.stringify(appData));
+        
         updateAllDisplays();
+        showAlert('Données synchronisées avec le serveur', 'success');
     });
     
     socket.on('dataUpdated', (data) => {
@@ -235,16 +249,33 @@ function updateAllDisplays() {
 }
 
 function loadData() {
+    console.log('🔄 Chargement des données locales (fallback)');
     const saved = localStorage.getItem('cotisationApp');
     if (saved) {
-        const savedData = JSON.parse(saved);
-        appData = { ...appData, ...savedData };
-        appData.currentWeek = getCurrentWeekKey(); // Toujours utiliser la semaine actuelle
+        try {
+            const savedData = JSON.parse(saved);
+            appData = { ...appData, ...savedData };
+            appData.currentWeek = getCurrentWeekKey(); // Toujours utiliser la semaine actuelle
+            console.log('✅ Données locales chargées');
+        } catch (error) {
+            console.error('❌ Erreur lors du chargement des données locales:', error);
+            localStorage.removeItem('cotisationApp'); // Supprimer les données corrompues
+        }
+    } else {
+        console.log('ℹ️ Aucune donnée locale trouvée');
     }
     
     // Initialiser les paiements pour la semaine actuelle si nécessaire
+    if (!appData.payments) {
+        appData.payments = {};
+    }
     if (!appData.payments[appData.currentWeek]) {
         appData.payments[appData.currentWeek] = {};
+    }
+    
+    // Initialiser les dettes si nécessaire
+    if (!appData.debts) {
+        appData.debts = {};
     }
 }
 
