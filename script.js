@@ -1208,7 +1208,6 @@ function openGroupModal(groupId = null) {
         if (group) {
             document.getElementById('groupId').value = group.id;
             document.getElementById('groupName').value = group.name;
-            document.getElementById('groupTask').value = group.task;
         }
     } else {
         title.textContent = 'Créer un Groupe';
@@ -1265,19 +1264,17 @@ function saveGroup(event) {
     
     const groupId = document.getElementById('groupId').value;
     const name = document.getElementById('groupName').value;
-    const task = document.getElementById('groupTask').value;
     const memberCheckboxes = document.querySelectorAll('#groupMembers input[type="checkbox"]:checked');
     const members = Array.from(memberCheckboxes).map(cb => cb.value);
     
-    if (!name || !task || members.length === 0) {
-        showAlert('Veuillez remplir tous les champs et sélectionner au moins un membre', 'error');
+    if (!name || members.length === 0) {
+        showAlert('Veuillez remplir le nom du groupe et sélectionner au moins un membre', 'error');
         return;
     }
     
     const group = {
         id: groupId ? parseInt(groupId) : Date.now(),
         name,
-        task,
         members
     };
     
@@ -1331,18 +1328,12 @@ function displayGroups() {
     container.innerHTML = appData.groups.map(group => {
         const memberNames = group.members.join(', ');
         
-        const taskNames = {
-            'marche': 'Faire le marché',
-            'poulet': 'Acheter le poulet',
-            'repos': 'Se reposer'
-        };
-        
         return `
             <div class="group-item">
                 <div class="group-info">
                     <h4>${group.name}</h4>
-                    <p><strong>Tâche :</strong> ${taskNames[group.task]}</p>
                     <p><strong>Membres :</strong> ${memberNames}</p>
+                    <p class="group-note">Les tâches sont assignées automatiquement selon la rotation hebdomadaire</p>
                 </div>
                 <div class="group-actions">
                     <button class="btn btn-secondary" onclick="openGroupModal(${group.id})">
