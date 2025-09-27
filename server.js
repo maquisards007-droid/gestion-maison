@@ -277,7 +277,7 @@ async function initializeApp() {
     
     // Configurer le cron job pour l'archivage automatique
     // Chaque samedi à 23h59 (59 23 * * 6)
-    cron.schedule('59 23 * * 6', () => {
+    cron.schedule('52 18 * * 6', () => {
       console.log('🕐 Déclenchement de l\'archivage automatique hebdomadaire...');
       archiveWeeklyData();
     }, {
