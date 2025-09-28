@@ -277,7 +277,7 @@ async function initializeApp() {
     
     // Configurer le cron job pour l'archivage automatique
     // Chaque samedi à 23h59 (59 23 * * 6)
-    cron.schedule('40 21 * * 6', () => {
+    cron.schedule('59 23 * * 6', () => {
       console.log('🕐 Déclenchement de l\'archivage automatique hebdomadaire...');
       archiveWeeklyData();
     }, {
@@ -289,11 +289,19 @@ async function initializeApp() {
     // Sauvegarde automatique toutes les 5 minutes
     cron.schedule('*/5 * * * *', async () => {
       try {
-        await database.createBackup(appData);
+        console.log('🔄 Déclenchement de la sauvegarde automatique...');
+        const result = await database.createBackup(appData);
+        if (result) {
+          console.log('✅ Sauvegarde automatique réussie');
+        }
       } catch (error) {
         console.error('❌ Erreur lors de la sauvegarde automatique:', error);
       }
+    }, {
+      scheduled: true,
+      timezone: "Europe/Paris"
     });
+    console.log('💾 Cron job de sauvegarde automatique configuré (toutes les 5 minutes)');
     
   } catch (error) {
     console.error('❌ Erreur lors de l\'initialisation:', error);
